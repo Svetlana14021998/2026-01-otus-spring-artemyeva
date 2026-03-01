@@ -16,12 +16,12 @@ public class TestRunnerServiceImpl implements TestRunnerService {
         try {
             testService.executeTest();
         } catch (QuestionReadException e) {
-            ioService.printLine("Can`t read file");
+            ioService.printLine("Can`t read questions");
         } catch (QuestionIncorrectDataException e) {
-            ioService.printLine("Incorrect data in csv file");
+            ioService.printLine("Incorrect questions data");
         } catch (RuntimeException e) {
             if (e.getCause() instanceof QuestionIncorrectDataException) {
-                ioService.printLine("Incorrect data in csv file");
+                ioService.printLine("Incorrect questions data");
             } else {
                 ioService.printLine("Other error. Write to support");
             }

@@ -131,12 +131,9 @@ class TestServiceImplTest {
             .hasMessage("Not answers for question " + (index + 1));
 
         //then
-        //+1 because call this method for print empty str before other text
-        int countOfCallPrintLine = questions.subList(0, index).size() + 1;
-
         assertAll(
             () -> verify(questionDao, times(1)).findAll(),
-            () -> verify(ioService, times(countOfCallPrintLine)).printLine(any()),
+            () -> verify(ioService, times(1)).printLine(any()),
             () -> verify(ioService, times(1)).printFormattedLine(any()));
     }
 

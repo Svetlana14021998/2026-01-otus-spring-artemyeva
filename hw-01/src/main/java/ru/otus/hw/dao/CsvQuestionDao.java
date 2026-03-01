@@ -12,13 +12,11 @@ import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -26,56 +24,57 @@ public class CsvQuestionDao implements QuestionDao {
     private final TestFileNameProvider fileNameProvider;
 
     @Override
-    public List<Question> findAll() throws RuntimeException {
+    public List<Question> findAll() {
         String fileName = fileNameProvider.getTestFileName();
         try {
-            File csvFile = getResourceAsFile(fileName);
-            List<QuestionDto> question = configureAndReadCsv(csvFile);
-
+            List<QuestionDto> question = readCsv(fileName);
             return question.stream()
                 .map(QuestionDto::toDomainObject)
                 .toList();
-        } catch (FileNotFoundException e) {
-            throw new QuestionReadException(String.format("File %s not found", fileName), e);
         } catch (IOException e) {
-            throw new QuestionReadException(String.format("Can`t read file %s", fileName), e);
+            throw new QuestionReadException(String.format("Error reading file %s", fileName), e);
         }
     }
 
-    private List<QuestionDto> configureAndReadCsv(File csvFile) throws IOException {
-        try (FileReader fileReader = new FileReader(csvFile)) {
-            CSVParser parser = new CSVParserBuilder()
-                .withSeparator(';')
-                .build();
-
-            CSVReader reader = new CSVReaderBuilder(fileReader)
-                .withCSVParser(parser)
-                .withSkipLines(1)
-                .build();
-
+    private List<QuestionDto> readCsv(String fileName) throws IOException {
+        InputStream inputStream = null;
+        InputStreamReader streamReader = null;
+        CSVReader reader = null;
+        try {
+            inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+            if (inputStream == null) {
+                throw new FileNotFoundException(String.format("File %s not found", fileName));
+            }
+            streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            reader = configCsvReader(streamReader);
             CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
                 .withType(QuestionDto.class)
                 .build();
             return csvToBean.parse();
-        } catch (IOException e) {
-            throw new IOException();
+        } finally {
+            closeResource(reader);
+            closeResource(streamReader);
+            closeResource(inputStream);
         }
     }
 
-    public File getResourceAsFile(String path) throws IOException {
-        String filename = Paths.get(path).getFileName().toString();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+    private CSVReader configCsvReader(InputStreamReader streamReader) {
+        CSVParser parser = new CSVParserBuilder()
+            .withSeparator(';')
+            .build();
+        return new CSVReaderBuilder(streamReader)
+            .withCSVParser(parser)
+            .withSkipLines(1)
+            .build();
+    }
 
-        if (inputStream == null) {
-            throw new FileNotFoundException();
+    private void closeResource(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                System.err.println("Error closing resource: " + closeable.getClass().getSimpleName());
+            }
         }
-
-        File tempFile = File.createTempFile("temp_", filename);
-        tempFile.deleteOnExit();
-
-        try (inputStream; FileOutputStream outputStream = new FileOutputStream(tempFile)) {
-            inputStream.transferTo(outputStream);
-        }
-        return tempFile;
     }
 }
