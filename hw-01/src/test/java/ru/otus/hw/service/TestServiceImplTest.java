@@ -76,7 +76,7 @@ class TestServiceImplTest {
 
         //then
         //+1 because call this method for print empty str before other text
-        int countOfCallPrintLine = countOfPrintCall(questions) + 1;
+        int countOfCallPrintLine = questions.size() + 1;
 
         assertAll(
             () -> verify(questionDao, times(1)).findAll(),
@@ -132,20 +132,12 @@ class TestServiceImplTest {
 
         //then
         //+1 because call this method for print empty str before other text
-        int countOfCallPrintLine = countOfPrintCall(questions.subList(0, index)) + 1;
+        int countOfCallPrintLine = questions.subList(0, index).size() + 1;
 
         assertAll(
             () -> verify(questionDao, times(1)).findAll(),
             () -> verify(ioService, times(countOfCallPrintLine)).printLine(any()),
             () -> verify(ioService, times(1)).printFormattedLine(any()));
-    }
-
-    private int countOfPrintCall(List<Question> questions) {
-        int countOfQuestions = questions.size();
-        return questions.stream()
-            .map(Question::answers)
-            .map(List::size)
-            .reduce(countOfQuestions * 2, Integer::sum);
     }
 
     private int findIndexWithIncorrectAnswers(List<Question> questions) {
