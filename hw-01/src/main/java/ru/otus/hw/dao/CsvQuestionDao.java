@@ -31,30 +31,29 @@ public class CsvQuestionDao implements QuestionDao {
             return question.stream()
                 .map(QuestionDto::toDomainObject)
                 .toList();
-        } catch (IOException e) {
+        } catch (QuestionReadException e) {
             throw new QuestionReadException(String.format("Error reading file %s", fileName), e);
         }
     }
 
-    private List<QuestionDto> readCsv(String fileName) throws IOException {
-        InputStream inputStream = null;
-        InputStreamReader streamReader = null;
-        CSVReader reader = null;
-        try {
-            inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+    private List<QuestionDto> readCsv(String fileName) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
                 throw new FileNotFoundException(String.format("File %s not found", fileName));
             }
-            streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            reader = configCsvReader(streamReader);
-            CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
-                .withType(QuestionDto.class)
-                .build();
-            return csvToBean.parse();
-        } finally {
-            closeResource(reader);
-            closeResource(streamReader);
-            closeResource(inputStream);
+            try (InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                 CSVReader reader = configCsvReader(streamReader)) {
+                CsvToBean<QuestionDto> csvToBean = new CsvToBeanBuilder<QuestionDto>(reader)
+                    .withType(QuestionDto.class)
+                    .build();
+                return csvToBean.parse();
+            }
+        } catch (FileNotFoundException e) {
+            throw new QuestionReadException("File not found", e);
+        } catch (IOException e) {
+            throw new QuestionReadException("Exception when try close resource", e);
+        } catch (Exception e) {
+            throw new QuestionReadException("Exception when read csv file", e);
         }
     }
 
@@ -66,15 +65,5 @@ public class CsvQuestionDao implements QuestionDao {
             .withCSVParser(parser)
             .withSkipLines(1)
             .build();
-    }
-
-    private void closeResource(AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                System.err.println("Error closing resource: " + closeable.getClass().getSimpleName());
-            }
-        }
     }
 }
