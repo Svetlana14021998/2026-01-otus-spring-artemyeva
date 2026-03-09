@@ -16,12 +16,13 @@ import ru.otus.hw.models.Genre;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Repository
 @RequiredArgsConstructor
@@ -55,8 +56,7 @@ public class JdbcBookRepository implements BookRepository {
         var genres = genreRepository.findAll();
         var books = getAllBooksWithoutGenres();
         var relations = getAllGenreRelations();
-        mergeBooksInfo(books, genres, relations);
-        return books;
+        return mergeBooksInfo(books, genres, relations);
     }
 
     @Override
@@ -89,17 +89,19 @@ public class JdbcBookRepository implements BookRepository {
             new BookGenreRelationMapper());
     }
 
-    private void mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
+    private List<Book> mergeBooksInfo(List<Book> booksWithoutGenres, List<Genre> genres,
         List<BookGenreRelation> relations) {
-        for (Book book : booksWithoutGenres) {
-            Set<Long> genreIds = relations.stream()
-                .filter(r -> r.bookId == book.getId())
-                .map(BookGenreRelation::genreId).collect(Collectors.toSet());
-            List<Genre> genreForCurrentBook = genres.stream()
-                .filter(x -> genreIds.contains(x.getId()))
-                .toList();
-            book.setGenres(genreForCurrentBook);
+        Map<Long, Book> booksMap = booksWithoutGenres.stream()
+            .collect(toMap(Book::getId, book -> book));
+        Map<Long, Genre> genreMapMap = genres.stream()
+            .collect(toMap(Genre::getId, genre -> genre));
+
+        for (BookGenreRelation relation : relations) {
+            var book = booksMap.get(relation.bookId());
+            var genre = genreMapMap.get(relation.genreId());
+            book.getGenres().add(genre);
         }
+        return booksMap.values().stream().toList();
     }
 
     private Book insert(Book book) {
@@ -162,7 +164,7 @@ public class JdbcBookRepository implements BookRepository {
             long authorId = rs.getLong("author_id");
             String fullName = rs.getString("full_name");
             Author author = new Author(authorId, fullName);
-            return new Book(id, title, author, Collections.emptyList());
+            return new Book(id, title, author, new ArrayList<>());
         }
     }
 
