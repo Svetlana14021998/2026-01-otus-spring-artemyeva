@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb
+  sql:
+    init:
+      mode: never
+  h2:
+    console:
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  flyway:
+    enabled: true
+    clean-on-validation-error: false
