@@ -115,7 +115,7 @@ class TestServiceImplTest {
         //when
         assertThatThrownBy(() -> testService.executeTestFor(new Student("Ivan", "Ivanov")))
             .isInstanceOf(QuestionIncorrectDataException.class)
-            .hasMessage("Not answer for question. Check csv file");
+            .hasMessage("Not answer for question");
 
         //then
         assertAll(

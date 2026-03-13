@@ -26,7 +26,7 @@ public class TestServiceImpl implements TestService {
     public TestResult executeTestFor(Student student) {
         var questions = questionDao.findAll();
         if (!questionValidator.isQuestionsHasAnswers(questions)) {
-            throw new QuestionIncorrectDataException("Not answer for question. Check csv file");
+            throw new QuestionIncorrectDataException("Not answer for question");
         }
         ioService.printLine("");
         ioService.printFormattedLine("Please answer the questions below%n");
