@@ -1,4 +1,4 @@
-package hw;
+package ru.otus.hw;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
