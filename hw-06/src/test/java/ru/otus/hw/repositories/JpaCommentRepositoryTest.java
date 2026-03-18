@@ -12,14 +12,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Sql(scripts = "/db/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Import({JdbcCommentRepository.class})
+@Import({JpaCommentRepository.class})
 @DisplayName("Проверка работы JdbcCommentRepository")
-class JdbcCommentRepositoryTest extends AbstractRepositoryTest {
+class JpaCommentRepositoryTest extends AbstractRepositoryTest {
 
     private static final long FIRST_COMMENT_ID = 1;
 
     @Autowired
-    private JdbcCommentRepository repository;
+    private JpaCommentRepository repository;
 
     @Test
     @DisplayName("Поиск комментария по его id")

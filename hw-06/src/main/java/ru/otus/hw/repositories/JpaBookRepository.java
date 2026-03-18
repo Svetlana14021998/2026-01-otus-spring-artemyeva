@@ -9,33 +9,28 @@ import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.FETCH;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcBookRepository implements BookRepository {
+public class JpaBookRepository implements BookRepository {
 
     @PersistenceContext
     private final EntityManager em;
 
     @Override
     public Optional<Book> findById(long id) {
-        EntityGraph<?> entityGraph = em.getEntityGraph("author-graph");
-        TypedQuery<Book> query = em.createQuery("select distinct b from Book b " +
-                "join fetch b.genres " +
-                "where b.id=:id", Book.class)
-            .setParameter("id", id);
-        query.setHint(FETCH.getKey(), entityGraph);
-        return Optional.ofNullable(query.getSingleResult());
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-with-author-and-genre-graph");
+        return Optional.ofNullable(em.find(Book.class, id, Map.of(FETCH.getKey(), entityGraph)));
     }
 
     @Override
     public List<Book> findAll() {
-        EntityGraph<?> entityGraph = em.getEntityGraph("author-graph");
-        TypedQuery<Book> query = em.createQuery("select distinct b from Book b " +
-            "join fetch b.genres ", Book.class);
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-with-author-and-genre-graph");
+        TypedQuery<Book> query = em.createQuery("select distinct b from Book b ", Book.class);
         query.setHint(FETCH.getKey(), entityGraph);
         return query.getResultList();
     }

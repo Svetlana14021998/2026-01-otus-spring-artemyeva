@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
-import ru.otus.hw.repositories.JdbcBookRepository;
-import ru.otus.hw.repositories.JdbcCommentRepository;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +16,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private final JdbcCommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
-    private final JdbcBookRepository bookRepository;
+    private final BookRepository bookRepository;
 
     @Transactional(readOnly = true)
     @Override

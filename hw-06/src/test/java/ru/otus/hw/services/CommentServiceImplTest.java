@@ -1,5 +1,6 @@
 package ru.otus.hw.services;
 
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,27 +10,29 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DisplayName("Проверка работы CommentServiceImpl")
 public class CommentServiceImplTest extends AbstractServiceImplTest {
 
     @Autowired
-    private CommentServiceImpl bookService;
+    private CommentServiceImpl commentService;
 
     @Test
     @DisplayName("Проверка загрузки всех связанных сущностей при поиске по id")
     void doesNotThrowExceptionForFindByIdTest() {
         // given
         // when
-        Optional<Comment> book = bookService.findById(1);
+        Optional<Comment> comment = commentService.findById(1);
 
         // then
-        assertThat(book).isPresent();
+        assertThat(comment).isPresent();
 
-        Comment expectedComment = book.get();
+        Comment expectedComment = comment.get();
 
-        assertDoesNotThrow(() -> expectedComment.getBook().getId());
+        assertThatThrownBy(() -> expectedComment.getBook().getTitle())
+            .isInstanceOf(LazyInitializationException.class);
     }
 
     @Test
@@ -37,10 +40,11 @@ public class CommentServiceImplTest extends AbstractServiceImplTest {
     void doesNotThrowExceptionForFindAllTest() {
         // given
         // when
-        List<Comment> expectedComments = bookService.findAllByBookId(1);
+        List<Comment> expectedComments = commentService.findAllByBookId(1);
 
         // then
-        assertDoesNotThrow(() -> expectedComments.get(0).getBook().getId());
+        assertThatThrownBy(() -> expectedComments.get(0).getBook().getTitle())
+            .isInstanceOf(LazyInitializationException.class);
     }
 
     @Test
@@ -48,10 +52,10 @@ public class CommentServiceImplTest extends AbstractServiceImplTest {
     void doesNotThrowExceptionForSaveTest() {
         // given
         // when
-        Comment expectedComment = bookService.insert("new Comment", 1);
+        Comment expectedComment = commentService.insert("new Comment", 1);
 
         // then
-        assertDoesNotThrow(() -> expectedComment.getBook().getId());
+        assertDoesNotThrow(() -> expectedComment.getBook().getTitle());
     }
 
     @Test
@@ -59,9 +63,9 @@ public class CommentServiceImplTest extends AbstractServiceImplTest {
     void doesNotThrowExceptionForUpdateTest() {
         // given
         // when
-        Comment expectedComment = bookService.update(1, "update Book", 2);
+        Comment expectedComment = commentService.update(1, "update Book", 2);
 
         // then
-        assertDoesNotThrow(() -> expectedComment.getBook().getId());
+        assertDoesNotThrow(() -> expectedComment.getBook().getTitle());
     }
 }

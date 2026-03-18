@@ -13,15 +13,15 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql(scripts = "/db/genre-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Import(JdbcGenreRepository.class)
+@Import(JpaGenreRepository.class)
 @DisplayName("Проверка работы JdbcGenreRepository")
-class JdbcGenreRepositoryTest extends AbstractRepositoryTest {
+class JpaGenreRepositoryTest extends AbstractRepositoryTest {
 
     private static final int GENRES_COUNT = 4;
     private static final long FIRST_GENRE_ID = 1;
     private static final long THIRD_GENRE_ID = 3;
     @Autowired
-    private JdbcGenreRepository repository;
+    private JpaGenreRepository repository;
 
     @Test
     @DisplayName("Поиск жанров по списку id-шников")

@@ -5,7 +5,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Sql(scripts = {"/db/delete-all-from-tables.sql", "/db/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class AbstractServiceImplTest {
 }

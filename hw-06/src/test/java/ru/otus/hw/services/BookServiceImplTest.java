@@ -32,7 +32,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
         Book expectedBook = book.get();
 
         assertAll(
-            () -> assertDoesNotThrow(() -> expectedBook.getAuthor().getId()),
+            () -> assertDoesNotThrow(() -> expectedBook.getAuthor().getFullName()),
             () -> assertDoesNotThrow(() -> expectedBook.getGenres().size()));
     }
 
@@ -45,7 +45,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
 
         // then
         assertAll(
-            () -> assertDoesNotThrow(() -> books.get(0).getAuthor().getId()),
+            () -> assertDoesNotThrow(() -> books.get(0).getAuthor().getFullName()),
             () -> assertDoesNotThrow(() -> books.get(0).getGenres().size()));
     }
 
@@ -58,7 +58,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
 
         // then
         assertAll(
-            () -> assertDoesNotThrow(() -> book.getAuthor().getId()),
+            () -> assertDoesNotThrow(() -> book.getAuthor().getFullName()),
             () -> assertDoesNotThrow(() -> book.getGenres().size()));
     }
 
@@ -71,7 +71,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
 
         // then
         assertAll(
-            () -> assertDoesNotThrow(() -> book.getAuthor().getId()),
+            () -> assertDoesNotThrow(() -> book.getAuthor().getFullName()),
             () -> assertDoesNotThrow(() -> book.getGenres().size()));
     }
 }

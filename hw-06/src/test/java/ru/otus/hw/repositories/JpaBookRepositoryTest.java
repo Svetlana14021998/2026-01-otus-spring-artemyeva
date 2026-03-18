@@ -9,26 +9,23 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Sql(scripts = "/db/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Import({JdbcBookRepository.class, JdbcGenreRepository.class})
+@Import({JpaBookRepository.class, JpaGenreRepository.class})
 @DisplayName("Проверка работы JdbcBookRepository")
-class JdbcBookRepositoryTest extends AbstractRepositoryTest {
+class JpaBookRepositoryTest extends AbstractRepositoryTest {
 
     private static final long FIRST_BOOK_ID = 1;
 
     private static final int BOOKS_COUNT = 3;
 
     @Autowired
-    private JdbcBookRepository repository;
-
-    @Autowired
-    private JdbcGenreRepository genreRepository;
+    private JpaBookRepository repository;
 
     @Test
     @DisplayName("Поиск книги по его id")
@@ -69,7 +66,9 @@ class JdbcBookRepositoryTest extends AbstractRepositoryTest {
     void saveBookTest() {
         //given
         Author author = em.find(Author.class, 1);
-        List<Genre> genres = genreRepository.findAllByIds(Set.of(1L, 2L));
+        Genre genre1 = em.find(Genre.class, 1L);
+        Genre genre2 = em.find(Genre.class, 2L);
+        List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
         Book book = new Book(0, "New Book", author, genres);
 
         //when
@@ -99,7 +98,10 @@ class JdbcBookRepositoryTest extends AbstractRepositoryTest {
         //given
         var book = em.find(Book.class, FIRST_BOOK_ID);
         Author author = em.find(Author.class, 2);
-        List<Genre> genres = genreRepository.findAllByIds(Set.of(5L, 6L));
+        Genre genre1 = em.find(Genre.class, 5L);
+        Genre genre2 = em.find(Genre.class, 6L);
+        List<Genre> genres = new ArrayList<>(List.of(genre1, genre2));
+
         String newTitle = "new Title";
         book.setTitle(newTitle);
         book.setGenres(genres);

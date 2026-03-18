@@ -13,16 +13,16 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql(scripts = "/db/author-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@Import(JdbcAuthorRepository.class)
+@Import(JpaAuthorRepository.class)
 @DisplayName("Проверка работы JdbcAuthorRepository")
-public class JdbcAuthorRepositoryTest extends AbstractRepositoryTest {
+public class JpaAuthorRepositoryTest extends AbstractRepositoryTest {
 
     private static final int AUTHORS_COUNT = 3;
 
     private static final long FIRST_AUTHOR_ID = 1;
 
     @Autowired
-    private JdbcAuthorRepository repository;
+    private JpaAuthorRepository repository;
 
     @Test
     @DisplayName("Поиск автора по его id")
