@@ -3,6 +3,7 @@ package ru.otus.hw.services;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DisplayName("Проверка работы BookServiceImpl")
-public class BookServiceImplTest extends AbstractServiceImplTest{
+public class BookServiceImplTest extends AbstractServiceImplTest {
 
     @Autowired
     private BookServiceImpl bookService;
@@ -24,12 +25,12 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
     void doesNotThrowExceptionForFindByIdTest() {
         // given
         // when
-        Optional<Book> book = bookService.findById(1);
+        Optional<BookDto> book = bookService.findById(1);
 
         // then
         assertThat(book).isPresent();
 
-        Book expectedBook = book.get();
+        BookDto expectedBook = book.get();
 
         assertAll(
             () -> assertDoesNotThrow(() -> expectedBook.getAuthor().getFullName()),
@@ -41,7 +42,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
     void doesNotThrowExceptionForFindAllTest() {
         // given
         // when
-        List<Book> books = bookService.findAll();
+        List<BookDto> books = bookService.findAll();
 
         // then
         assertAll(
@@ -54,7 +55,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
     void doesNotThrowExceptionForSaveTest() {
         // given
         // when
-        Book book = bookService.insert("new Book", 1, Set.of(1L, 2L));
+        BookDto book = bookService.insert("new Book", 1, Set.of(1L, 2L));
 
         // then
         assertAll(
@@ -67,7 +68,7 @@ public class BookServiceImplTest extends AbstractServiceImplTest{
     void doesNotThrowExceptionForUpdateTest() {
         // given
         // when
-        Book book = bookService.update(1, "update Book", 2, Set.of(3L, 4L));
+        BookDto book = bookService.update(1, "update Book", 2, Set.of(3L, 4L));
 
         // then
         assertAll(

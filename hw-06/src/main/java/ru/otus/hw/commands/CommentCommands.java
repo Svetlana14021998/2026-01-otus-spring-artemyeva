@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.CommentConverter;
-import ru.otus.hw.models.Comment;
 import ru.otus.hw.services.CommentService;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
@@ -22,7 +20,7 @@ public class CommentCommands {
     //ac 1
     @ShellMethod(value = "Find all comment for book", key = "ac")
     public String findAllComments(long bookId) {
-        List<Comment> allComments = commentService.findAllByBookId(bookId);
+        var allComments = commentService.findAllByBookId(bookId);
         if (allComments.isEmpty()) {
             return "Not found comments for book with id: %s".formatted(bookId);
         }
