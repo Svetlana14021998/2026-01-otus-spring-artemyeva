@@ -1,0 +1,11 @@
+# Добавить сюда своих вопросов. Эту строку надо пропустить при настройке CsvToBean (withSkipLines)
+Is there life on Mars?;Science doesn't know this yet%true|Certainly. The red UFO is from Mars. And green is from Venus%false|Absolutely not%false
+How should resources be loaded form jar in Java?;ClassLoader#geResourceAsStream or ClassPathResource#getInputStream%true|ClassLoader#geResource#getFile + FileReader%false|Wingardium Leviosa%false
+Which option is a good way to handle the exception?;@SneakyThrow%false|e.printStackTrace()%false|Rethrow with wrapping in business exception (for example, QuestionReadException)%true|Ignoring exception%false
+Tests?;No, good enough%false|Manual tester’s job%false|Of course%true
+Do empty interfaces exists?;Yes%true|No%false|I don`t know%false
+Can create abstract method in simple class?;Yes%false|No%true
+Final class - class which...;Can`t modifier in code%false|Can`t be extends%true|Can`t implements interfaces%false
+What is the best for tasks: ArrayList or LinkedList?;ArrayList%false|LinkedList%false|Depend on required data operations%true
+Can catch error?;Yes,but can`t do something%true|No%false
+Can exists static method in interfaces?; No%false|Yes%false|Yes, if exists the method implemented%true
