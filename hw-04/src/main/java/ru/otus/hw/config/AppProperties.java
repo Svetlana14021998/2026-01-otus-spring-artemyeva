@@ -23,6 +23,17 @@ public class AppProperties implements TestConfig, TestFileNameProvider, LocaleCo
         this.locale = Locale.forLanguageTag(locale);
     }
 
+    public void setLocaleByCountry(String locale) {
+        switch (locale.toUpperCase()) {
+            case "RU":
+                setLocale("ru-RU");
+                break;
+            case "EN":
+                setLocale("en-US");
+                break;
+        }
+    }
+
     @Override
     public String getTestFileName() {
         return fileNameByLocaleTag.get(locale.toLanguageTag());
