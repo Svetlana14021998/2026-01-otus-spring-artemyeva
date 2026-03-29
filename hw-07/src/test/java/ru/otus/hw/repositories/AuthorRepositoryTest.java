@@ -11,7 +11,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Sql(scripts = "/db/author-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/db/delete-all-from-tables.sql","/db/author-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @DisplayName("Проверка работы AuthorRepository")
 public class AuthorRepositoryTest extends AbstractRepositoryTest {
 

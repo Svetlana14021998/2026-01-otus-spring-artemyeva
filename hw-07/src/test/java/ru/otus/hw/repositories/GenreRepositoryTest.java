@@ -11,7 +11,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Sql(scripts = "/db/genre-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/db/delete-all-from-tables.sql","/db/genre-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @DisplayName("Проверка работы GenreRepository")
 class GenreRepositoryTest extends AbstractRepositoryTest {
 

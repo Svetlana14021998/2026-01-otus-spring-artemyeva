@@ -10,7 +10,7 @@ import ru.otus.hw.models.Comment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@Sql(scripts = "/db/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/db/delete-all-from-tables.sql","/db/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @DisplayName("Проверка работы CommentRepository")
 class CommentRepositoryTest extends AbstractRepositoryTest {
 
