@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    sql-migration-prefix: V
+    repeatable-sql-migration-prefix:
+    clean-on-validation-error: false
+    log-level: DEBUG
+  sql:
+    init:
+      mode: never
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  shell:
+    interactive:
+      enabled: false
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb: DEBUG
