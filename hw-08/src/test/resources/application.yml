@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: test
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: test_company
+  shell:
+    interactive:
+      enabled: false
+mongock:
+  enabled: false
