@@ -59,8 +59,8 @@ public class BookController {
         return "commentsForBook";
     }
 
-    @GetMapping("books/edit")
-    public String editBook(@RequestParam("id") Long id, Model model) {
+    @GetMapping("books/edit/{id}")
+    public String editBook(@PathVariable Long id, Model model) {
         Optional<BookDto> book = bookService.findById(id);
         if (book.isEmpty()) {
             throw new EntityNotFoundException("Entity with id %d not found".formatted(id));
@@ -111,9 +111,19 @@ public class BookController {
 
     @PostMapping("/books/create")
     public String createBook(@Valid @ModelAttribute("book") BookDto bookDto,
-        BindingResult bindingResult, @RequestParam(value = "authorId", required = false) long authorId,
+        BindingResult bindingResult, @RequestParam(value = "authorId", required = false) Long authorId,
         @RequestParam(value = "genreIds", required = false) Set<Long> genreIds,
         Model model) {
+        if (genreIds == null || genreIds.isEmpty()) {
+            String text = messageSource.getMessage("genres-can-not-be-empty", null,
+                LocaleContextHolder.getLocale());
+            bindingResult.rejectValue("genres", "genre can`t be empty", text);
+        }
+        if (authorId == null) {
+            String text = messageSource.getMessage("author-can-not-be-null", null,
+                LocaleContextHolder.getLocale());
+            bindingResult.rejectValue("author", "author can`t be null", text);
+        }
         if (bindingResult.hasErrors()) {
             List<AuthorDto> authors = authorService.findAll();
             List<GenreDto> genres = genreService.findAll();

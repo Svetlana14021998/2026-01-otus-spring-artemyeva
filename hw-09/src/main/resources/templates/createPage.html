@@ -25,23 +25,25 @@
 
     <div>
         <label for="author-select" th:text="#{author} + ':'">Author:</label>
-        <select id="author-select" name="authorId" required>
+        <select id="author-select" name="authorId" >
             <option value="" disabled selected th:text="#{select-author}">Select author</option>
             <option th:each="a : ${authors}"
                     th:value="${a.id}"
                     th:text="${a.fullName}">
             </option>
         </select>
+        <div class="errors" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Author can not be null</div>
     </div>
 
     <div>
         <label for="genre-select" th:text="#{genres} + ':'">Genres:</label>
-        <select id="genre-select" name="genreIds" multiple required>
+        <select id="genre-select" name="genreIds" multiple >
             <option th:each="g : ${genres}"
                     th:value="${g.id}"
                     th:text="${g.name}">
             </option>
         </select>
+        <div class="errors" th:if="${#fields.hasErrors('genres')}" th:errors="*{genres}">Genres can not be empty</div>
     </div>
     <div class="row">
         <button type="submit" th:text="#{save-button}">Save</button>
