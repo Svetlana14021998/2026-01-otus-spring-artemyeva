@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" href="../static/css/styles.css">
+    <title>All books</title>
+</head>
+<body>
+<div class="topnav">
+    <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+    <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+    <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+</div>
+
+<h3 th:text="#{select-language}">Select language</h3>
+
+<div>
+    <div><a href="#" th:href="@{/(lang=en)}" >
+        <img th:src="@{/images/en.png}" alt="English" th:alt="#{eng}" width="38" height="38">
+        </a></div>
+    <div><a href="#" th:href="@{/(lang=ru)}">
+        <img th:src="@{/images/ru.png}" alt="Russian" th:alt="#{rus}" width="32" height="32">
+    </a></div>
+</div>
+
+<div class="books-container">
+<table class="books">
+    <caption th:text="#{books-list}">Books</caption>
+    <thead>
+    <tr>
+        <th th:text="#{id}">ID</th>
+        <th th:text="#{title}">Title</th>
+        <th th:text="#{author}">Author</th>
+        <th th:text="#{genres}">Genres</th>
+        <th th:text="#{comments}">Comment</th>
+        <th th:text="#{edit}">Edit</th>
+        <th th:text="#{delete}">Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="b : ${books}">
+        <td th:text="${b.id}">1</td>
+        <td th:text="${b.title}">Book Title</td>
+        <td th:text="${b.author.getFullName()}">Author</td>
+        <td th:text="${b.genresAsString()}">Genres</td>
+        <td>
+            <a th:href="@{/books/__${b.id}__}" href="bookWithAllInfo.html" th:text="#{show-comment}">See</a>
+        </td>
+        <td>
+            <a th:href="@{/books/edit(id=${b.id})}" href="editBook.html" th:text="#{edit}">Edit</a>
+        </td>
+        <td>
+            <details class="delete-details">
+                <summary class="delete-summary" th:text="#{delete}">Delete</summary>
+                <div class="delete-confirm">
+                    <p th:text="#{confirm-question}">Delete this book?</p>
+                    <form th:action="@{/books/delete(id=${b.id})}" method="post">
+                        <button type="submit" class="confirm-delete-btn" th:text="#{yes}">Yes</button>
+                        <button type="button" class="cancel-delete-btn" onclick="this.closest('details').removeAttribute('open')" th:text="#{no}">No</button>
+                    </form>
+                </div>
+            </details>
+        </td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+</div>
+<div class="add-book-container">
+    <a th:href="@{/books/create}" class="add-book-btn">
+        <span class="add-icon">+</span>
+        <span th:text="#{add-new-book}">Add New Book</span>
+    </a>
+</div>
+</body>
+</html>

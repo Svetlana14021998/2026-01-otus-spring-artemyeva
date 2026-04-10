@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/errorStyle.css}" href="../static/css/errorStyle.css">
+    <title>Error</title>
+</head>
+<body>
+<div class="error-container">
+    <div class="error-icon">⚠️</div>
+    <h1 class="error-title" th:text="#{error}">Error:</h1>
+    <div class="error-message" th:text="${errorText}">
+        An unexpected error occurred. Please try later.
+    </div>
+    <a th:href="@{/books}" class="back-button" th:text="#{to-books}">← Back to books</a>
+</div>
+</body>
+</html>
