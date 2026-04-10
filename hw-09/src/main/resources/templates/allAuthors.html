@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" href="../static/css/styles.css">
+    <title>All authors</title>
+</head>
+<body>
+<div class="full-page-bg">
+<div class="topnav">
+    <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+    <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+    <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+</div>
+    <div class="authors-container">
+<table class="authors">
+    <caption th:text="#{authors-list}">Authors</caption>
+    <thead>
+    <tr>
+        <th th:text="#{id}">ID</th>
+        <th th:text="#{author-name}">Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${authors}">
+        <td th:text="${a.id}">1</td>
+        <td th:text="${a.fullName}">Pushkin</td>
+    </tr>
+    </tbody>
+</table>
+    </div>
+</div>
+</body>
+</html>
