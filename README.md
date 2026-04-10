@@ -12,3 +12,4 @@
 <h4>hw-06 - Домашняя работа по теме "JPQL, Spring ORM, DAO на основе Spring ORM + JPA"</h4>
 <h4>hw-07 - Домашняя работа по теме ""Белая магия" Spring Data: Spring Data JPA"</h4>
 <h4>hw-08 - Домашняя работа по теме "Spring Data для подключения к нереляционным БД"</h4>
+<h4>hw-09 - Домашняя работа по теме "Введение в Spring MVC, Spring MVC View на Spring Boot"</h4>
