@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/info.css}" href="../static/css/info.css">
+
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css"/>
+    <title>All books</title>
+</head>
+<body>
+<div class="topnav">
+    <div class="topnav-links">
+        <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+        <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+        <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+    </div>
+    <div class="topnav-lang">
+        <a th:href="@{/books(lang=en)}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/books(lang=ru)}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+<div id="localization-data" style="display: none;">
+    <span id="text-show-comment" th:text="#{show-comment}">See comments</span>
+    <span id="text-edit" th:text="#{edit}">Edit</span>
+    <span id="text-delete" th:text="#{delete}">Delete</span>
+    <span id="text-confirm-question" th:text="#{confirm-question}">Delete this book?</span>
+    <span id="text-yes" th:text="#{yes}">Yes</span>
+    <span id="text-no" th:text="#{no}">No</span>
+</div>
+
+<div class="content-wrapper">
+    <div class="add-book-container">
+        <a th:href="@{/books/create}" class="add-book-btn">
+            <span class="add-icon">+</span>
+            <span th:text="#{add-new-book}">Add New Book</span>
+        </a>
+    </div>
+
+    <div class="books-container">
+        <table class="books">
+            <caption th:text="#{books-list}">Books</caption>
+            <thead>
+            <tr>
+                <th th:text="#{id}">ID</th>
+                <th th:text="#{title}">Title</th>
+                <th th:text="#{author}">Author</th>
+                <th th:text="#{genres}">Genres</th>
+                <th th:text="#{comments}">Comments</th>
+                <th th:text="#{edit}">Edit</th>
+                <th th:text="#{delete}">Delete</th>
+            </tr>
+            </thead>
+            <tbody id="booksTableBody">
+            <tr>
+                <td colspan="7" class="loading-message">Loading books...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <p id="deleteMessage">Delete this book?</p>
+        <div class="modal-buttons">
+            <button id="modalConfirmBtn" class="modal-confirm">Yes</button>
+            <button id="modalCancelBtn" class="modal-cancel">No</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDeleteBookId = null;
+    const modal = document.getElementById('deleteModal');
+    const deleteMessage = document.getElementById('deleteMessage');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    const localizedTexts = {
+        'show-comment': document.getElementById('text-show-comment').textContent,
+        'edit': document.getElementById('text-edit').textContent,
+        'delete': document.getElementById('text-delete').textContent,
+        'confirm-question': document.getElementById('text-confirm-question').textContent,
+        'yes': document.getElementById('text-yes').textContent,
+        'no': document.getElementById('text-no').textContent
+    };
+
+
+    function loadBooks() {
+        fetch('/api/books')
+            .then(response =>  response.json())
+            .then(books => renderBooks(books));
+    }
+
+    function renderBooks(books) {
+        const tbody = document.getElementById('booksTableBody');
+        tbody.innerHTML = '';
+
+        books.forEach(book => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.id}</td>
+                <td>${book.title || 'N/A'}</td>
+                <td>${book.author?.fullName || 'N/A'}</td>
+                <td>${book.genres?.map(g => g.name).join(', ') || 'N/A'}</td>
+                <td>
+                    <a href="/books/${book.id}/comments">
+                ${localizedTexts['show-comment']}
+            </a>
+                </td>
+                <td>
+            <a href="/books/${book.id}/edit">
+                ${localizedTexts['edit']}
+            </a>
+                </td>
+                <td>
+            <button type="button" class="delete-btn" data-id="${book.id}">
+                ${localizedTexts['delete']}
+            </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        setupDeleteButtons();
+    }
+
+    function setupDeleteButtons() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                currentDeleteBookId = this.getAttribute('data-id');
+                deleteMessage.textContent = localizedTexts['confirm-question'];
+                modal.classList.add('show');
+            });
+        });
+    }
+
+    modalConfirmBtn.addEventListener('click', function() {
+        if (currentDeleteBookId) {
+            deleteBook(currentDeleteBookId);
+        }
+        hideModal();
+    });
+
+    modalCancelBtn.addEventListener('click', hideModal);
+
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) hideModal();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && modal.classList.contains('show')) hideModal();
+    });
+
+    function deleteBook(bookId) {
+        fetch(`/api/books/${bookId}`, {
+            method: 'DELETE' })
+            .then(response => loadBooks());
+    }
+
+    function hideModal() {
+        modal.classList.remove('show');
+        currentDeleteBookId = null;
+    }
+
+     document.addEventListener('DOMContentLoaded', loadBooks);
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/info.css}" href="../static/css/info.css">
+
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <title th:text="#{comments-for-book} + ' - ' + ${bookTitle}">Comments for Book</title>
+</head>
+<body>
+<div class="topnav">
+    <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+    <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+    <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+
+    <div class="topnav-lang">
+        <a th:href="@{/books/{id}/comments(id=${bookId},lang=en)}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/books/{id}/comments(id=${bookId},lang=ru)}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+<div id="localization-data" style="display: none;">
+    <span id="loc-comments-for-book" th:text="#{comments-for-book}"></span>
+    <span id="loc-no-comments-title" th:text="#{no-comments-title}"></span>
+    <span id="loc-id" th:text="#{id}"></span>
+    <span id="loc-comment-text" th:text="#{comment-text}"></span>
+</div>
+
+<div class="comments-container">
+    <div id="comments-content">
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+   const bookId = parseInt(document.getElementById('bookId').value, 10);
+    const bookTitle = document.getElementById('bookTitle').value;
+
+        const locCommentsForBook = document.getElementById('loc-comments-for-book').textContent;
+        const locNoCommentsTitle = document.getElementById('loc-no-comments-title').textContent;
+        const locId = document.getElementById('loc-id').textContent;
+        const locCommentText = document.getElementById('loc-comment-text').textContent;
+
+        loadComments(bookId, locCommentsForBook, bookTitle, locId, locCommentText, locNoCommentsTitle);
+    });
+
+    function loadComments(bookId, locCommentsForBook, bookTitle, locId, locCommentText, locNoCommentsTitle) {
+
+        fetch(`/api/books/${bookId}/comments`)
+            .then(response =>  response.json())
+            .then(comments =>
+                renderComments(comments, locCommentsForBook, bookTitle, locId, locCommentText, locNoCommentsTitle));
+    }
+
+    function renderComments(comments, locCommentsForBook, bookTitle, locId, locCommentText, locNoCommentsTitle) {
+        const container = document.getElementById('comments-content');
+
+
+        if (comments.length === 0) {
+            container.innerHTML = `
+                <div class="empty-comments">
+                    <h2>${locCommentsForBook} ${bookTitle}</h2>
+                    <div class="empty-comments-icon">💬</div>
+                    <h3>${locNoCommentsTitle}</h3>
+                </div>
+            `;
+            return;
+        }
+
+        let commentsHtml = `
+            <table class="comments">
+                <caption>${locCommentsForBook} ${bookTitle}</caption>
+                <thead>
+                    <tr>
+                        <th>${locId}</th>
+                <th>${locCommentText}</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        comments.forEach(comment => {
+            commentsHtml += `
+                    <tr>
+                <td>${comment.id}</td>
+                <td>${comment.text || 'No text'}</td>
+                <td></td>
+                    </tr>
+            `;
+        });
+
+        commentsHtml += `
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = commentsHtml;
+    }
+</script>
+
+<input type="hidden" id="bookId" th:value="${bookId}" value="0">
+<input type="hidden" id="bookTitle" th:value="${bookTitle}" value="Unknown Book">
+</body>
+</html>
