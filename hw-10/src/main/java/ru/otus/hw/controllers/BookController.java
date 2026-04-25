@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.CommentDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 
@@ -32,13 +31,9 @@ public class BookController {
     }
 
     @DeleteMapping("/api/books/{id}")
-    public ResponseEntity deleteBook(@PathVariable Long id) {
-        try {
-            bookService.deleteById(id);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        bookService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/api/books/{id}/comments")
@@ -60,7 +55,6 @@ public class BookController {
 
     @GetMapping("/api/books/{id}")
     public BookDto getBookById(@PathVariable Long id) {
-        return bookService.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+        return bookService.findById(id);
     }
 }

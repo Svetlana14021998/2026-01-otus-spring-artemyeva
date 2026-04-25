@@ -33,9 +33,10 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<BookDto> findById(long id) {
+    public BookDto findById(long id) {
         Optional<Book> book = bookRepository.findById(id);
-        return Optional.ofNullable(converter.convert(book.orElse(null)));
+        return converter.convert(book
+            .orElseThrow(() -> new EntityNotFoundException("Books with id=%d not found!".formatted(id))));
     }
 
     @Transactional(readOnly = true)
@@ -63,7 +64,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public void deleteById(long id) {
         if (!bookRepository.existsById(id)) {
-            throw new IllegalArgumentException("Books with id=%d not found!".formatted(id));
+            throw new EntityNotFoundException("Books with id=%d not found!".formatted(id));
         }
         bookRepository.deleteById(id);
     }
