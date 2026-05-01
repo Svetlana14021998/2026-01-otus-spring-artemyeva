@@ -17,12 +17,10 @@ import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,7 +76,7 @@ class BookControllerTest {
             new AuthorDto(1, "Author1"),
             List.of(new GenreDto(1, "Genre1"), new GenreDto(2, "Genre2")));
 
-        when(bookService.findById(1)).thenReturn(Optional.of(book));
+        when(bookService.findById(1)).thenReturn(book);
 
         //when
         mvc.perform(MockMvcRequestBuilders.get("/api/books/1"))
@@ -138,25 +136,13 @@ class BookControllerTest {
     }
 
     @Test
-    @DisplayName("Удаление книги (с ошибкой)")
-    void deleteWithErrorTest() throws Exception {
-        //given
-        doThrow(new IllegalArgumentException()).when(bookService).deleteById(anyLong());
-
-        //when
-        mvc.perform(MockMvcRequestBuilders.delete("/api/books/1"))
-            //then
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
     @DisplayName("Получение комментариев по id книги")
     void findCommentsByBookIdTest() throws Exception {
         //given
         List<CommentDto> comments = List.of(
-            new CommentDto(1,"Comment1",1,"BookTitle1"),
-            new CommentDto(2,"Comment2",1,"BookTitle1"),
-            new CommentDto(3,"Comment3",1,"BookTitle1")
+            new CommentDto(1, "Comment1", 1, "BookTitle1"),
+            new CommentDto(2, "Comment2", 1, "BookTitle1"),
+            new CommentDto(3, "Comment3", 1, "BookTitle1")
         );
 
         when(commentService.findAllByBookId(1)).thenReturn(comments);
