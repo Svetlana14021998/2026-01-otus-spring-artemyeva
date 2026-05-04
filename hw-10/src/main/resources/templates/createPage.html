@@ -1,0 +1,263 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/forms.css}" href="../static/css/forms.css">
+    <link rel="stylesheet" th:href="@{/css/createStyle.css}" href="../static/css/createStyle.css">
+
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <title>Create Book</title>
+</head>
+<body>
+<div class="topnav">
+    <div class="topnav-links">
+        <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+        <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+        <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+    </div>
+    <div class="topnav-lang">
+        <a th:href="@{/books/create(lang=en)}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/books/create(lang=ru)}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+<form id="create-book-form" class="form-container">
+    <div class="form-content">
+        <h3 th:text="#{create-book}">New Book:</h3>
+
+        <div class="form-group">
+            <label for="title-input" th:text="#{title} + ':'">Title:</label>
+            <input id="title-input" type="text" name="title" placeholder="Book Title">
+            <div id="title-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="author-select" th:text="#{author} + ':'">Author:</label>
+            <select id="author-select" name="authorId">
+                <option value="" disabled selected th:text="#{select-author}">Select author</option>
+            </select>
+            <div id="author-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="genre-select" th:text="#{genres} + ':'">Genres:</label>
+            <select id="genre-select" name="genreIds" multiple size="3">
+            </select>
+            <div id="genres-error" class="error-message"></div>
+        </div>
+
+        <div id="success-message" class="success-message" aria-live="polite">
+            <p th:text="#{book-created-success}">Book created successfully!</p>
+        </div>
+    </div>
+
+    <div class="form-actions-wrapper">
+        <div class="form-actions row">
+            <button type="submit" th:text="#{save-button}">Save</button>
+            <a th:href="@{/books}"><button type="button" th:text="#{cancel-button}">Cancel</button></a>
+        </div>
+    </div>
+</form>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const messages = {
+      goToBooks: /*[[#{go-to-books}]]*/
+  };
+   let authorsData = [];
+   let genresData = [];
+
+   document.addEventListener('DOMContentLoaded', function() {
+       loadAuthors();
+       loadGenres();
+   });
+
+   function loadAuthors() {
+       fetch('/api/authors')
+           .then(response => response.json())
+           .then(authors => {
+               authorsData = authors;
+               const select = document.getElementById('author-select');
+               authors.forEach(author => {
+                   const option = document.createElement('option');
+                   option.value = author.id;
+                   option.textContent = author.fullName;
+                   select.appendChild(option);
+               });
+           });
+   }
+
+   function loadGenres() {
+       fetch('/api/genres')
+           .then(response => response.json())
+           .then(genres => {
+               genresData = genres;
+               const select = document.getElementById('genre-select');
+               genres.forEach(genre => {
+                   const option = document.createElement('option');
+                   option.value = genre.id;
+                   option.textContent = genre.name;
+                   select.appendChild(option);
+               });
+           });
+   }
+
+   function clearErrors() {
+       document.querySelectorAll('.error-message').forEach(el => {
+           el.textContent = '';
+           el.classList.remove('errors');
+       });
+   }
+
+   function showBackendErrors(errorData) {
+       if (errorData.errors) {
+           Object.keys(errorData.errors).forEach(field => {
+               let errorId;
+               switch(field) {
+                   case 'title':
+                       errorId = 'title-error';
+                       break;
+                   case 'author':
+                       errorId = 'author-error';
+                       break;
+                   case 'genres':
+                       errorId = 'genres-error';
+                       break;
+                   default:
+                       errorId = field + '-error';
+               }
+               const errorElement = document.getElementById(errorId);
+               if (errorElement) {
+                   errorElement.textContent = errorData.errors[field];
+                   errorElement.classList.add('errors');
+               }
+           });
+       } else if (errorData.message) {
+           const firstError = document.querySelector('.error-message');
+           if (firstError) {
+               firstError.textContent = errorData.message;
+               firstError.classList.add('errors');
+           }
+       }
+   }
+
+function showGoToBooksButton() {
+       const formActions = document.querySelector('.form-actions');
+       if (!formActions) return;
+
+       formActions.innerHTML = '';
+
+       const goToBooksBtn = document.createElement('a');
+       goToBooksBtn.href = '/books';
+       goToBooksBtn.className = 'go-to-books-btn';
+       goToBooksBtn.innerHTML = `<span>📚</span> ${messages.goToBooks}`;
+
+       goToBooksBtn.style.display = 'inline-flex';
+       goToBooksBtn.style.alignItems = 'center';
+       goToBooksBtn.style.gap = '8px';
+       goToBooksBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)';
+       goToBooksBtn.style.color = 'white';
+       goToBooksBtn.style.textDecoration = 'none';
+       goToBooksBtn.style.padding = '10px 24px';
+       goToBooksBtn.style.borderRadius = '30px';
+       goToBooksBtn.style.fontSize = '16px';
+       goToBooksBtn.style.fontWeight = '600';
+       goToBooksBtn.style.transition = 'all 0.3s ease';
+       goToBooksBtn.style.border = 'none';
+       goToBooksBtn.style.cursor = 'pointer';
+       goToBooksBtn.style.width = '100%';
+       goToBooksBtn.style.justifyContent = 'center';
+
+       goToBooksBtn.onmouseover = function() {
+           this.style.transform = 'translateY(-2px)';
+           this.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
+           this.style.background = 'linear-gradient(135deg, #34ce57 0%, #28a745 100%)';
+       };
+       goToBooksBtn.onmouseout = function() {
+           this.style.transform = 'translateY(0)';
+           this.style.boxShadow = 'none';
+           this.style.background = 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)';
+       };
+
+       formActions.appendChild(goToBooksBtn);
+   }
+
+   function restoreOriginalButtons() {
+       const formActions = document.querySelector('.form-actions');
+       if (!formActions) return;
+
+       formActions.innerHTML = `
+           <button type="submit" th:text="#{save-button}">Save</button>
+           <a th:href="@{/books}"><button type="button" th:text="#{cancel-button}">Cancel</button></a>
+       `;
+       const newSubmitBtn = formActions.querySelector('button[type="submit"]');
+       if (newSubmitBtn) {
+       }
+   }
+
+   document.getElementById('create-book-form').addEventListener('submit', function(e) {
+       e.preventDefault();
+       clearErrors();
+
+       const successMessage = document.getElementById('success-message');
+       successMessage.classList.remove('show');
+
+       const formData = new FormData(this);
+       const title = formData.get('title');
+       const authorId = parseInt(formData.get('authorId'), 10);
+       const selectedGenreIds = Array.from(formData.getAll('genreIds'))
+           .map(id => parseInt(id, 10))
+           .filter(id => !isNaN(id));
+
+       const author = authorsData.find(a => a.id === authorId) || null;
+       const genres = genresData.filter(g => selectedGenreIds.includes(g.id));
+
+       const bookDto = {
+           id: 0,
+           title: title,
+           author: author,
+           genres: genres
+       };
+
+       fetch('/api/books', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+           body: JSON.stringify(bookDto)
+       })
+       .then(response => {
+           if (!response.ok) {
+               return response.json().then(errorData => {
+                   throw errorData;
+               });
+           }
+           return response.json();
+       })
+       .then(book => {
+           successMessage.classList.add('show');
+           showGoToBooksButton();
+           document.getElementById('create-book-form').reset();
+           document.getElementById('author-select').selectedIndex = 0;
+           const genreSelect = document.getElementById('genre-select');
+           for(let i = 0; i < genreSelect.options.length; i++) {
+               genreSelect.options[i].selected = false;
+           }
+           setTimeout(() => {
+               successMessage.classList.remove('show');
+           }, 3000);
+       })
+       .catch(error =>
+           showBackendErrors(error)
+       );
+   });
+</script>
+
+</body>
+</html>
