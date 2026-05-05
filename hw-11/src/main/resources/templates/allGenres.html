@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/info.css}" href="../static/css/info.css">
+
+    <link rel="icon" type="image/png"  th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <title>All authors</title>
+</head>
+<body>
+<div class="topnav">
+    <div class="topnav-links">
+        <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+        <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+        <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+    </div>
+    <div class="topnav-lang">
+        <a th:href="@{/genres(lang=en)}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/genres(lang=ru)}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+
+<div class="genres-container">
+<table class="genres">
+    <caption th:text="#{genres-lest}">Genres</caption>
+    <thead>
+    <tr>
+        <th th:text="#{id}">ID</th>
+        <th th:text="#{genre_name}">Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="g : ${genres}">
+        <td th:text="${g.id}">1</td>
+        <td th:text="${g.name}">Genre</td>
+    </tr>
+    </tbody>
+    <script>
+        function loadGenres() {
+            fetch("/api/genres")
+                .then(response => response.json())
+                .then(genres => {
+                    const tbody = document.querySelector('tbody');
+                    tbody.innerHTML = '';
+                    genres.forEach(genre => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${genre.id}</td>
+                                <td>${genre.name}</td>
+                            </tr>
+                        `;
+                    });
+                })
+        }
+        document.addEventListener("DOMContentLoaded", loadGenres);
+    </script>
+</table>
+</div>
+</body>
+</html>
