@@ -9,12 +9,12 @@
 
     <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
-    <title>Create Book</title>
+    <title th:text="#{add-new-book}">Create Book</title>
 </head>
 <body>
 <div class="topnav">
     <div class="topnav-links">
-        <a th:href="@{/main}" href="#" th:text="#{main}">Books</a>
+        <a th:href="@{/main}" href="#" th:text="#{main}">Main</a>
         <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
         <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
         <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
