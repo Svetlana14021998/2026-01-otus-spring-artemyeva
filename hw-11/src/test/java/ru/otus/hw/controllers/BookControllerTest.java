@@ -152,9 +152,9 @@ class BookControllerTest {
     void findCommentsByBookIdTest() throws Exception {
         //given
         List<CommentDto> comments = List.of(
-            new CommentDto(1L, "Comment1", 1L, "BookTitle1"),
-            new CommentDto(2L, "Comment2", 1L, "BookTitle1"),
-            new CommentDto(3L, "Comment3", 1L, "BookTitle1")
+            new CommentDto(1L, "Comment1", 1L),
+            new CommentDto(2L, "Comment2", 1L),
+            new CommentDto(3L, "Comment3", 1L)
         );
 
         when(commentService.findAllByBookId(1)).thenReturn(Flux.fromIterable(comments));

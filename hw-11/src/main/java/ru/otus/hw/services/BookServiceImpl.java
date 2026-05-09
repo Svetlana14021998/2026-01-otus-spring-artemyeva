@@ -36,16 +36,8 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public Mono<BookDto> findById(long id) {
-        return bookRepository.findById(id)
-            .switchIfEmpty(Mono.error(new EntityNotFoundException("Books with id=%d not found!".formatted(id))))
-            .flatMap(book -> Mono.zip(Mono.just(book),
-                    authorRepository.findById(book.getAuthorId())
-                        .switchIfEmpty(Mono.error(new EntityNotFoundException(
-                            "Author with id=%d not found for book id=%d".formatted(book.getAuthorId(), book.getId())))),
-                    bookRepository.findGenreIdsByBookId(book.getId())
-                        .collectList()
-                        .flatMap(genreIds -> genreRepository.findAllByIdIn(genreIds).collectList()))
-                .map(tuple -> converter.convert(tuple.getT1(), tuple.getT2(), tuple.getT3())));
+        return bookRepositoryCustom.findById(id)
+            .switchIfEmpty(Mono.error(new EntityNotFoundException("Books with id=%d not found!".formatted(id))));
     }
 
     @Transactional(readOnly = true)
@@ -74,8 +66,7 @@ public class BookServiceImpl implements BookService {
                     if (!exist) {
                         return Mono.error(new EntityNotFoundException("Books with id=%d not found!".formatted(id)));
                     }
-                    return bookRepository.deleteBookGenresByBookId(id)
-                        .then(bookRepository.deleteById(id));
+                    return bookRepository.deleteById(id);
                 }
             );
     }
@@ -86,21 +77,25 @@ public class BookServiceImpl implements BookService {
             .map(GenreDto::getId)
             .toList();
 
-        return Mono.zip(authorRepository.findById(authorId)
-                    .switchIfEmpty(Mono.error(new EntityNotFoundException("Author not found: " + authorId))),
-                genreRepository.findAllByIdIn(genresIds)
-                    .collectList()
-                    .flatMap(genres -> {
-                        if (genres.size() != genresIds.size()) {
-                            return Mono.error(new EntityNotFoundException("One or all genres with ids %s not found"
-                                .formatted(genresIds)));
-                        }
-                        return Mono.just(genres);
-                    }))
-            .flatMap(tuple -> {
-                var book = new Book(bookDto.getId(), authorId, bookDto.getTitle());
-                return saveOrUpdateBook(book, tuple.getT1(), tuple.getT2());
-            });
+        var authorMono = authorRepository.findById(authorId)
+            .switchIfEmpty(Mono.error(new EntityNotFoundException("Author not found: " + authorId)));
+
+        var genresListMono = genreRepository.findAllByIdIn(genresIds)
+            .collectList()
+            .flatMap(genres -> checkGenres(genres, genresIds));
+
+        return Mono.zip(authorMono, genresListMono).flatMap(tuple -> {
+            var book = new Book(bookDto.getId(), authorId, bookDto.getTitle());
+            return saveOrUpdateBook(book, tuple.getT1(), tuple.getT2());
+        });
+    }
+
+    private Mono<List<Genre>> checkGenres(List<Genre> genres, List<Long> genresIds) {
+        if (genres.size() != genresIds.size()) {
+            return Mono.error(new EntityNotFoundException("One or all genres with ids %s not found"
+                .formatted(genresIds)));
+        }
+        return Mono.just(genres);
     }
 
     private Mono<BookDto> saveOrUpdateBook(Book book, Author author, List<Genre> genres) {

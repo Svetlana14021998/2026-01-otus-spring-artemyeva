@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.AuthorDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.GenreDto;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookRepositoryCustom {
 
-    private static final String SQL_ALL = """
+    private static final String FIND_ALL = """
         select
             b.id,
             b.title,
@@ -34,13 +36,24 @@ public class BookRepositoryCustom {
         from books b
         """;
 
+    private static final String FIND_BY_ID = FIND_ALL
+        + "where b.id=:id";
+
     private final R2dbcEntityTemplate template;
 
     private final ObjectMapper objectMapper;
 
+    public Mono<BookDto> findById(long id) {
+        return template.getDatabaseClient()
+            .sql(FIND_BY_ID)
+            .bind("id", id)
+            .map(this::mapper)
+            .one();
+    }
+
     public Flux<BookDto> findAll() {
         return template.getDatabaseClient().inConnectionMany(connection ->
-            Flux.from(connection.createStatement(SQL_ALL)
+            Flux.from(connection.createStatement(FIND_ALL)
                     .execute())
                 .flatMap(result -> result.map(this::mapper)));
     }
@@ -50,9 +63,19 @@ public class BookRepositoryCustom {
         String title = selectedRecord.get("title", String.class);
 
         String authorJson = selectedRecord.get("author", String.class);
+
+        if (authorJson == null) {
+            throw new EntityNotFoundException("Author not found for book id=" + id);
+        }
+
         AuthorDto author = parseAuthorDto(authorJson);
 
         String genresJson = selectedRecord.get("genres", String.class);
+
+        if (genresJson == null || genresJson.equals("[]")) {
+            throw new EntityNotFoundException("Genres not found for book id=" + id);
+        }
+
         List<GenreDto> genres = parseGenresDto(genresJson);
 
         return new BookDto(id, title, author, genres);
