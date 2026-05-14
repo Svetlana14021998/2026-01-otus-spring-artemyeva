@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.dto.UserDto;
 import ru.otus.hw.exceptions.LoginAlreadyExistsException;
-import ru.otus.hw.models.User;
+import ru.otus.hw.models.AppUser;
 import ru.otus.hw.repositories.UserRepository;
 
 @Service
@@ -23,8 +23,8 @@ public class UserServiceImpl implements UserService {
             throw new LoginAlreadyExistsException(login);
         }
         String password = passwordEncoder.encode(userDto.getPassword());
-        var user = new User(userDto.getId(), login, password);
-        User saveUser = userRepository.save(user);
+        var user = new AppUser(userDto.getId(), login, password);
+        AppUser saveUser = userRepository.save(user);
         return saveUser.getUsername();
     }
 }

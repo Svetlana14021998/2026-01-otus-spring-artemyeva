@@ -2,14 +2,14 @@ package ru.otus.hw.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.models.User;
+import ru.otus.hw.models.AppUser;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends CrudRepository<User,Long> {
+public interface UserRepository extends CrudRepository<AppUser,Long> {
 
-    Optional<User> findByUsername(String username);
+    Optional<AppUser> findByUsername(String username);
 
     boolean existsByUsername(String username);
 }

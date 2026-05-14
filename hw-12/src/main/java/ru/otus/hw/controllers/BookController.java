@@ -17,6 +17,8 @@ import ru.otus.hw.services.CommentService;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.CREATED;
+
 @RestController
 @RequiredArgsConstructor
 public class BookController {
@@ -44,7 +46,7 @@ public class BookController {
     @PostMapping("/api/books")
     public ResponseEntity<BookDto> createBook(@Valid @RequestBody BookDto bookDto) {
         BookDto saveBook = bookService.insert(bookDto);
-        return ResponseEntity.ok(saveBook);
+        return ResponseEntity.status(CREATED).body(saveBook);
     }
 
     @PutMapping("/api/books")
@@ -54,7 +56,8 @@ public class BookController {
     }
 
     @GetMapping("/api/books/{id}")
-    public BookDto getBookById(@PathVariable Long id) {
-        return bookService.findById(id);
+    public ResponseEntity<BookDto> getBookById(@PathVariable Long id) {
+        var book = bookService.findById(id);
+        return ResponseEntity.ok(book);
     }
 }
