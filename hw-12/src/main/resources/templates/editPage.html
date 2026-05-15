@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/forms.css}" href="../static/css/forms.css">
+    <link rel="stylesheet" th:href="@{/css/editStyle.css}" href="../static/css/editStyle.css">
+
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <title th:text="#{change-book_title}">Edit book</title>
+</head>
+<body>
+<div class="topnav">
+    <div class="topnav-links">
+        <a th:href="@{/main}" href="#" th:text="#{main}">Main</a>
+        <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+        <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+        <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+    </div>
+    <div class="topnav-auth">
+         <span sec:authorize="isAuthenticated()"
+               class="username-display"
+               sec:authentication="name">
+            Username
+        </span>
+        <a sec:authorize="!isAuthenticated()"
+           href="/login" th:href="@{/login}"
+           class="auth-link login-link"
+           th:text="#{login}">Login</a>
+
+        <form sec:authorize="isAuthenticated()"
+              th:action="@{/logout}"
+              method="post"
+              style="display: inline;" class="logout-form">
+            <button type="submit" class="auth-link logout-btn"
+                    style="background: #dc3545 !important;"
+                    th:text="#{logout}">Logout</button>
+        </form>
+    </div>
+    <div class="topnav-lang">
+        <a th:href="@{/books/{id}/edit(id=${bookId}, lang='en')}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/books/{id}/edit(id=${bookId}, lang='ru')}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+<form id="edit-book-form" class="form-container">
+    <div class="form-content">
+        <h3 th:text="#{change-book}">Book:</h3>
+
+        <div class="form-group">
+            <label for="id-input" th:text="#{id} + ':'">ID:</label>
+            <input id="id-input" type="text" readonly="readonly" name="id" th:value="${bookId}">
+            <div id="id-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="title-input" th:text="#{title} + ':'">Title:</label>
+            <input id="title-input" type="text" name="title" placeholder="Book Title">
+            <div id="title-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="author-select" th:text="#{author} + ':'">Author:</label>
+            <select id="author-select" name="authorId">
+            </select>
+            <div id="author-error" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="genre-select" th:text="#{genres} + ':'">Genres:</label>
+            <select id="genre-select" name="genreIds" multiple size="3">
+            </select>
+            <div id="genres-error" class="error-message"></div>
+        </div>
+
+        <div id="success-message" class="success-message" aria-live="polite">
+            <p th:text="#{book-updated-success}">Book updated successfully!</p>
+        </div>
+    </div>
+
+    <div class="form-actions-wrapper">
+        <div class="form-actions row">
+            <button type="submit" th:text="#{save-button}">Save</button>
+            <a th:href="@{/books}"><button type="button" th:text="#{cancel-button}">Cancel</button></a>
+        </div>
+    </div>
+</form>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+   const messages = {
+       goToBooks: /*[[#{go-to-books}]]*/
+   };
+
+   let authorsData = [];
+   let genresData = [];
+   let bookData = null;
+   const bookId = [[${bookId}]];
+
+
+   document.addEventListener('DOMContentLoaded', function() {
+       loadAllData();
+   });
+
+   async function loadAllData() {
+
+           const bookResponse = await fetch(`/api/books/${bookId}`);
+           const book = await bookResponse.json();
+
+           const authorsResponse = await fetch('/api/authors');
+           const authors = await authorsResponse.json();
+
+           const genresResponse = await fetch('/api/genres');
+           const genres = await genresResponse.json();
+
+           bookData = book;
+           authorsData = authors;
+           genresData = genres;
+
+           fillForm();
+   }
+
+   function fillForm() {
+
+     const titleInput = document.getElementById('title-input');
+       titleInput.value = bookData.title;
+
+       const authorSelect = document.getElementById('author-select');
+       authorSelect.innerHTML = '';
+
+       authorsData.forEach(author => {
+           const option = document.createElement('option');
+           option.value = author.id;
+           option.textContent = author.fullName;
+           if (bookData.author && bookData.author.id === author.id) {
+               option.selected = true;
+           }
+           authorSelect.appendChild(option);
+       });
+
+       const genreSelect = document.getElementById('genre-select');
+       genreSelect.innerHTML = '';
+
+       genresData.forEach(genre => {
+           const option = document.createElement('option');
+           option.value = genre.id;
+           option.textContent = genre.name;
+           if (bookData.genres && bookData.genres.some(g => g.id === genre.id)) {
+               option.selected = true;
+           }
+           genreSelect.appendChild(option);
+       });
+   }
+
+   function clearErrors() {
+       document.querySelectorAll('.error-message').forEach(el => {
+           el.textContent = '';
+           el.classList.remove('errors');
+       });
+   }
+
+   function showBackendErrors(errorData) {
+       if (errorData.errors) {
+           Object.keys(errorData.errors).forEach(field => {
+               let errorId;
+               switch(field) {
+                   case 'title':
+                       errorId = 'title-error';
+                       break;
+                   case 'author':
+                       errorId = 'author-error';
+                       break;
+                   case 'genres':
+                       errorId = 'genres-error';
+                       break;
+                   default:
+                       errorId = field + '-error';
+               }
+               const errorElement = document.getElementById(errorId);
+               if (errorElement) {
+                   errorElement.textContent = errorData.errors[field];
+                   errorElement.classList.add('errors');
+               }
+           });
+       } else if (errorData.message) {
+           const firstError = document.querySelector('.error-message');
+           if (firstError) {
+               firstError.textContent = errorData.message;
+               firstError.classList.add('errors');
+           }
+       }
+   }
+
+function showGoToBooksButton() {
+       const formActions = document.querySelector('.form-actions');
+       if (!formActions) return;
+
+       formActions.innerHTML = '';
+
+       const goToBooksBtn = document.createElement('a');
+       goToBooksBtn.href = '/books';
+       goToBooksBtn.className = 'go-to-books-btn';
+       goToBooksBtn.innerHTML = `<span>📚</span> ${messages.goToBooks}`;
+
+       goToBooksBtn.style.display = 'inline-flex';
+       goToBooksBtn.style.alignItems = 'center';
+       goToBooksBtn.style.gap = '8px';
+       goToBooksBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)';
+       goToBooksBtn.style.color = 'white';
+       goToBooksBtn.style.textDecoration = 'none';
+       goToBooksBtn.style.padding = '10px 24px';
+       goToBooksBtn.style.borderRadius = '30px';
+       goToBooksBtn.style.fontSize = '16px';
+       goToBooksBtn.style.fontWeight = '600';
+       goToBooksBtn.style.transition = 'all 0.3s ease';
+       goToBooksBtn.style.border = 'none';
+       goToBooksBtn.style.cursor = 'pointer';
+       goToBooksBtn.style.width = '100%';
+       goToBooksBtn.style.justifyContent = 'center';
+
+       goToBooksBtn.onmouseover = function() {
+           this.style.transform = 'translateY(-2px)';
+           this.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
+           this.style.background = 'linear-gradient(135deg, #34ce57 0%, #28a745 100%)';
+       };
+       goToBooksBtn.onmouseout = function() {
+           this.style.transform = 'translateY(0)';
+           this.style.boxShadow = 'none';
+           this.style.background = 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)';
+       };
+
+       formActions.appendChild(goToBooksBtn);
+   }
+
+   function restoreOriginalButtons() {
+       const formActions = document.querySelector('.form-actions');
+       if (!formActions) return;
+
+       formActions.innerHTML = `
+           <button type="submit" th:text="#{save-button}">Save</button>
+           <a th:href="@{/books}"><button type="button" th:text="#{cancel-button}">Cancel</button></a>
+       `;
+       const newSubmitBtn = formActions.querySelector('button[type="submit"]');
+       if (newSubmitBtn) {
+       }
+   }
+
+   document.getElementById('edit-book-form').addEventListener('submit', function(e) {
+       e.preventDefault();
+       clearErrors();
+
+       const successMessage = document.getElementById('success-message');
+       successMessage.classList.remove('show');
+
+       const title = document.getElementById('title-input').value;
+       const authorId = parseInt(document.getElementById('author-select').value, 10);
+       const selectedGenreIds = Array.from(document.getElementById('genre-select').selectedOptions)
+           .map(option => parseInt(option.value, 10));
+
+       const author = authorsData.find(a => a.id === authorId) || null;
+       const genres = genresData.filter(g => selectedGenreIds.includes(g.id));
+
+       const bookDto = {
+           id: parseInt(bookId, 10),
+           title: title,
+           author: author,
+           genres: genres
+       };
+
+       fetch('/api/books', {
+           method: 'PUT',
+           headers: {
+               'Content-Type': 'application/json'
+           },
+           body: JSON.stringify(bookDto)
+       })
+       .then(response => {
+           if (!response.ok) {
+               return response.json().then(errorData => {
+                   throw errorData;
+               });
+           }
+           return response.json();
+       })
+       .then(book => {
+           bookData = book;
+           fillForm();
+           successMessage.classList.add('show');
+           showGoToBooksButton();
+           setTimeout(() => {
+               successMessage.classList.remove('show');
+           }, 3000);
+       })
+       .catch(error =>  showBackendErrors(error));
+   });
+</script>
+</body>
+</html>

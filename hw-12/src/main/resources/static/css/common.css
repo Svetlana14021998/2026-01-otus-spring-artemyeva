@@ -1,0 +1,417 @@
+/* common.css - Базовые стили для навигации, форм и общих элементов */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ===== НАВИГАЦИОННАЯ ПАНЕЛЬ (Общая для всех страниц) ===== */
+.topnav {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c0 100%);
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.topnav-links {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.topnav-lang {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.topnav a {
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.topnav a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: #ffd700;
+    color: #ffd700;
+}
+
+.lang-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px !important;
+}
+
+.lang-link:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-bottom-color: #ffd700 !important;
+}
+
+.fi {
+    font-size: 20px;
+}
+
+/* ===== СТИЛИ ДЛЯ ФОРМ (Создание и редактирование) ===== */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    padding: 30px;
+}
+
+form h3 {
+    font-size: 24px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+form > div {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+input[readonly] {
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+}
+
+select[multiple] {
+    min-height: 150px;
+    padding: 8px;
+}
+
+select[multiple] option {
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+select[multiple] option:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.errors {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    background-color: #ffe6e6;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.row {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+}
+
+button[type="submit"],
+.row a button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+button[type="submit"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.row a button {
+    background-color: white;
+    color: #666;
+    border: 1.5px solid #ddd;
+}
+
+.row a button:hover {
+    background-color: #fafafa;
+    border-color: #bbb;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== МОДАЛЬНОЕ ОКНО (Общее для всех страниц) ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    min-width: 300px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-confirm {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.modal-confirm:hover {
+    background-color: #ee5a5a;
+}
+
+.modal-cancel {
+    background: #ddd;
+    color: #333;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.modal-cancel:hover {
+    background-color: #ccc;
+}
+
+.delete-confirm {
+    display: none;
+}
+
+/* ===== СТРАНИЦА ОШИБКИ ===== */
+.error-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 20px;
+}
+
+.error-container {
+    max-width: 550px;
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    text-align: center;
+    padding: 50px 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.error-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+.error-title {
+    font-size: 28px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 16px;
+}
+
+.error-message {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+.back-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.error-code {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #999;
+    font-family: monospace;
+}
+
+.topnav-auth {
+    margin-left: auto;
+}
+
+.auth-link {
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.login-link {
+    background: #48bb78 !important;
+}
+
+.login-link:hover {
+    background: #38a169;
+    color: white;
+}
+
+.logout-btn:hover {
+     background: #c82333;
+     color: white;
+}
+
+.logout-form {
+    all: unset;
+    display: inline;
+    margin: 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.username-display {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 16px 6px 12px;
+    border-radius: 25px;
+    margin-right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid #ffd700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.username-display::before {
+    content: "👤";
+    font-size: 14px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.username-display:hover {
+    background: rgba(0, 0, 0, 0.4);
+    padding-right: 20px;
+}
