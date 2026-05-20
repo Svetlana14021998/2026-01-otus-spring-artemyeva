@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/info.css}" href="../static/css/info.css">
+
+    <link rel="icon" type="image/png"  th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+
+    <title th:text="#{authors}">All authors</title>
+</head>
+<body>
+<div class="full-page-bg">
+
+    <div class="topnav">
+        <div class="topnav-links">
+            <a th:href="@{/main}" href="#" th:text="#{main}">Main</a>
+            <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+            <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+            <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+        </div>
+        <div class="topnav-auth">
+             <span sec:authorize="isAuthenticated()"
+                   class="username-display"
+                   sec:authentication="name">
+            Username
+        </span>
+            <a sec:authorize="!isAuthenticated()"
+               href="/login" th:href="@{/login}"
+               class="auth-link login-link"
+               th:text="#{login}">Login</a>
+
+            <form sec:authorize="isAuthenticated()"
+                  th:action="@{/logout}"
+                  method="post"
+                  style="display: inline;" class="logout-form">
+                <button type="submit" class="auth-link logout-btn"
+                        style="background: #dc3545 !important;"
+                        th:text="#{logout}">Logout</button>
+            </form>
+        </div>
+        <div class="topnav-lang">
+            <a th:href="@{/authors(lang=en)}" class="lang-link" title="English">
+                <span class="fi fi-gb"></span>
+            </a>
+            <a th:href="@{/authors(lang=ru)}" class="lang-link" title="Русский">
+                <span class="fi fi-ru"></span>
+            </a>
+        </div>
+    </div>
+
+    <div class="authors-container">
+        <table class="authors">
+            <caption th:text="#{authors-list}">Authors</caption>
+            <thead>
+            <tr>
+                <th th:text="#{id}">ID</th>
+                <th th:text="#{author-name}">Name</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+
+            <script>
+                function loadAuthors() {
+                    fetch("/api/authors")
+                        .then(response => response.json())
+                        .then(authors => {
+                            const tbody = document.querySelector('tbody');
+                            tbody.innerHTML = '';
+                            authors.forEach(author => {
+                                tbody.innerHTML += `
+                                    <tr>
+                                        <td>${author.id}</td>
+                                        <td>${author.fullName}</td>
+                                    </tr>
+                                `;
+                            });
+                        })
+                }
+                document.addEventListener("DOMContentLoaded", loadAuthors);
+            </script>
+        </table>
+    </div>
+</div>
+</body>
+</html>
