@@ -41,65 +41,6 @@ public class BookServiceSecurityTest {
     @Autowired
     private BookRepository bookRepository;
 
-    @ParameterizedTest
-    @ValueSource(strings = {"USER", "MANAGER"})
-    @DisplayName("Удаление книги пользователем, у которого нет прав")
-    void deleteBookWhenNotExistsPermissionTest(String role) {
-        //given
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                "user",
-                "password",
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-            )
-        );
-        //when
-        assertThatThrownBy(() -> bookService.deleteById(1))
-            //then
-            .isInstanceOf(AccessDeniedException.class);
-    }
-
-    @WithMockUser(roles = "ADMIN")
-    @Test
-    @DisplayName("Удаление книги пользователем, у которого есть права")
-    void deleteBookWhenExistsPermissionTest() {
-        //given
-        //when
-        //then
-        assertThatNoException().isThrownBy(() -> bookService.deleteById(1));
-    }
-
-    @WithMockUser(roles = "USER")
-    @Test
-    @DisplayName("Изменение книги пользователем, у которого нет прав")
-    void updateBookWhenNotExistsPermissionTest() {
-        //given
-        //when
-        assertThatThrownBy(() -> bookService.update(new BookDto()))
-            //then
-            .isInstanceOf(AccessDeniedException.class);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER"})
-    @DisplayName("Удаление книги пользователем, у которого есть права")
-    void updateBookWhenExistsPermissionTest(String role) {
-        //given
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(
-                "user",
-                "password",
-                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-            )
-        );
-
-        BookDto bookDto = new BookDto(1, "title", new AuthorDto(1, "full_name"), List.of(new GenreDto(1, "Genre")));
-
-        //when
-        //then
-        assertThatNoException().isThrownBy(() -> bookService.update(bookDto));
-    }
-
     @WithMockUser(username = "user")
     @Test
     @DisplayName("Получение книги пользователем, у которого есть права")

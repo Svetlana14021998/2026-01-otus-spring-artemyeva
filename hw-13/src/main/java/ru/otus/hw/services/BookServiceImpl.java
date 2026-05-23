@@ -1,7 +1,6 @@
 package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.domain.BasePermission;
@@ -65,14 +64,12 @@ public class BookServiceImpl implements BookService {
         return converter.convert(book);
     }
 
-    @Secured({"ROLE_ADMIN", "ROLE_MANAGER"})
     @Transactional
     @Override
     public BookDto update(BookDto bookDto) {
         return converter.convert(save(bookDto));
     }
 
-    @Secured("ROLE_ADMIN")
     @Override
     @Transactional
     public void deleteById(long id) {

@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(BookController.class)
 @Import(SecurityConfig.class)
-@DisplayName("Проверка доступа к методам BookController в зависимости от аутентификации")
+@DisplayName("Проверка доступа к методам BookController в зависимости от аутентификации/авторизации")
 public class BookControllerSecurityTest {
 
     @Autowired
@@ -113,6 +113,29 @@ public class BookControllerSecurityTest {
         if (checkRedirect) {
             result.andExpect(redirectedUrlPattern("**/login"));
         }
+    }
+
+    private static Stream<Arguments> testDataForAuthorization() {
+        return Stream.of(
+            Arguments.of("delete", "/api/books/1", "ROLE_ADMIN", 200, "Удаление книги пользователем с ролью админ"),
+            Arguments.of("delete", "/api/books/1", "ROLE_MANAGER", 403, "Удаление книги пользователем с ролью менеджер"),
+            Arguments.of("delete", "/api/books/1", "ROLE_USER", 403, "Удаление книги пользователем с ролью пользователь"),
+            Arguments.of("put", "/api/books", "ROLE_ADMIN", 200, "Изменение книги пользователем с ролью админ"),
+            Arguments.of("put", "/api/books", "ROLE_MANAGER", 200, "Изменение книги пользователем с ролью менеджер"),
+            Arguments.of("put", "/api/books", "ROLE_USER", 403, "Изменение книги пользователем с ролью пользователь")
+        );
+    }
+
+    @ParameterizedTest(name = "{4}")
+    @MethodSource("testDataForAuthorization")
+    void checkAuthorizationTest(String method, String url, String role, int status, String description) throws Exception {
+        var requestBuilder = convertMethodToRequestBuilder(method, url);
+        requestBuilder = requestBuilder.with(user("userName")
+            .authorities(new SimpleGrantedAuthority(role)));
+        var result = mockMvc.perform(requestBuilder);
+
+        //then
+        result.andExpect(status().is(status));
     }
 
     private MockHttpServletRequestBuilder convertMethodToRequestBuilder(String method, String url) throws JsonProcessingException {

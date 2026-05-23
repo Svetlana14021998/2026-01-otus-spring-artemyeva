@@ -22,6 +22,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
         var user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException(String.format("User '%s' not found", username)));
         return new User(user.getUsername(), user.getPassword(),
-            user.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getName())).toList());
+            user.getAuthorities().stream().map(SimpleGrantedAuthority::new).toList());
     }
 }
