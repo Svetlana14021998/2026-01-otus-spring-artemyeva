@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:sourcedb
+    show-sql: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: targetdb
+  sql:
+    init:
+      mode: never
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+      settings:
+        web-allow-others: true
+  flyway:
+    enabled: true
+    clean-on-validation-error: false
+  batch:
+    job:
+      enabled: false
