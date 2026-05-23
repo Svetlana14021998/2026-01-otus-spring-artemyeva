@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}" href="../static/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="../static/css/main.css">
+
+    <link rel="icon" type="image/png"  th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+
+    <title th:text="#{main}">Main Page</title>
+</head>
+<body>
+<div class="full-page-bg">
+
+    <div class="topnav">
+
+        <div class="topnav-links">
+            <a th:href="@{/main}" href="#" th:text="#{main}">Main</a>
+            <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+            <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+            <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+        </div>
+
+        <div class="topnav-auth">
+            <span sec:authorize="isAuthenticated()"
+                  class="username-display"
+                  sec:authentication="name">
+            Username
+        </span>
+            <a sec:authorize="!isAuthenticated()"
+               href="/login" th:href="@{/login}"
+               class="auth-link login-link"
+               th:text="#{login}">Login</a>
+
+            <form sec:authorize="isAuthenticated()"
+                  th:action="@{/logout}"
+                  method="post"
+                  style="display: inline;" class="logout-form">
+                <button type="submit" class="auth-link logout-btn"
+                        style="background: #dc3545 !important;"
+                        th:text="#{logout}">Logout</button>
+            </form>
+        </div>
+
+        <div class="topnav-lang">
+            <a th:href="@{/main(lang=en)}" class="lang-link" title="English">
+                <span class="fi fi-gb"></span>
+            </a>
+            <a th:href="@{/main(lang=ru)}" class="lang-link" title="Русский">
+                <span class="fi fi-ru"></span>
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+        <div th:if="${param.logout}" id="logout-message" class="success-message" style="display: none;">
+            <span th:text="#{logout_success}">You have been successfully logged out!</span>
+        </div>
+        <h1 th:text="#{welcome}">Welcome to library!</h1>
+        <p th:text="#{about_site}">This is an electronic catalog of books, authors and genres.</p>
+        <div sec:authorize="!isAuthenticated()">
+        <span th:text="#{access}">For full access</span>
+            <a href="/login" th:href="@{/login}" th:text="#{login_in}" >login</a>
+            <span th:text="#{or}"> or</span>
+            <a href="/register" th:href="@{/register}" th:text="#{register}">Register</a>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutMessage = document.getElementById('logout-message');
+        if (logoutMessage && window.location.href.indexOf('logout') !== -1) {
+            logoutMessage.style.display = 'block';
+            setTimeout(function() {
+                logoutMessage.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(function() {
+                    logoutMessage.style.display = 'none';
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('logout');
+                    window.history.replaceState({}, document.title, url.toString());
+                }, 500);
+            }, 5000);
+        }
+    });
+</script>
+</body>
+</html>
