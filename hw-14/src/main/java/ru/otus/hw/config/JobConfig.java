@@ -24,6 +24,8 @@ import ru.otus.hw.migration.processor.AuthorMigrationProcessor;
 import ru.otus.hw.migration.processor.BookMigrationProcessor;
 import ru.otus.hw.migration.processor.CommentMigrationProcessor;
 import ru.otus.hw.migration.processor.GenreMigrationProcessor;
+import ru.otus.hw.migration.table.MigrationContext;
+import ru.otus.hw.migration.table.MigrationTable;
 import ru.otus.hw.models.h2.Author;
 import ru.otus.hw.models.h2.Book;
 import ru.otus.hw.models.h2.Comment;
@@ -68,9 +70,6 @@ public class JobConfig {
     private CommentMigrationProcessor commentMigrationProcessor;
 
     @Autowired
-    private MigrationStepExecutionListener stepExecutionListener;
-
-    @Autowired
     private MigrationItemReadListener<Comment> commentReadListener;
 
     @Autowired
@@ -94,6 +93,13 @@ public class JobConfig {
     @Autowired
     private MigrationItemWriteListener<AuthorDocument> authorWriteListener;
 
+    @Autowired
+    private MigrationContext migrationContext;
+
+    private MigrationStepExecutionListener createStepListener(MigrationTable table) {
+        return new MigrationStepExecutionListener(migrationContext, table);
+    }
+
     @Bean
     public RepositoryItemReader<Author> authorReader(AuthorRepository repository) {
         return createReader(repository);
@@ -108,7 +114,7 @@ public class JobConfig {
             .writer(authorRepositoryMongo::saveAll)
             .listener(authorReadListener)
             .listener(authorWriteListener)
-            .listener(stepExecutionListener)
+            .listener(createStepListener(MigrationTable.AUTHORS))
             .build();
     }
 
@@ -126,7 +132,7 @@ public class JobConfig {
             .writer(genreRepositoryMongo::saveAll)
             .listener(genreReadListener)
             .listener(genreWriteListener)
-            .listener(stepExecutionListener)
+            .listener(createStepListener(MigrationTable.GENRES))
             .build();
     }
 
@@ -144,7 +150,7 @@ public class JobConfig {
             .writer(bookRepositoryMongo::saveAll)
             .listener(bookReadListener)
             .listener(bookWriteListener)
-            .listener(stepExecutionListener)
+            .listener(createStepListener(MigrationTable.BOOKS))
             .build();
     }
 
@@ -162,7 +168,7 @@ public class JobConfig {
             .writer(commentRepositoryMongo::saveAll)
             .listener(commentReadListener)
             .listener(commentWriteListener)
-            .listener(stepExecutionListener)
+            .listener(createStepListener(MigrationTable.COMMENTS))
             .build();
     }
 

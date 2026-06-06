@@ -7,11 +7,13 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import ru.otus.hw.converter.Comment2CommentDocumentConverter;
 import ru.otus.hw.migration.table.MigrationTableService;
-import ru.otus.hw.migration.table.RelatedDocumentResolver;
 import ru.otus.hw.models.h2.Comment;
 import ru.otus.hw.models.mongo.BookDocument;
 import ru.otus.hw.models.mongo.CommentDocument;
+import ru.otus.hw.repositories.mongo.BookRepositoryMongo;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +28,9 @@ public class CommentMigrationProcessor implements ItemProcessor<Comment, Comment
 
     private final MigrationTableService migrationTableService;
 
-    private final RelatedDocumentResolver resolver;
+    private final BookMigrationProcessor bookMigrationProcessor;
+
+    private final BookRepositoryMongo bookRepository;
 
     private final Map<Long, String> cache = new ConcurrentHashMap<>();
 
@@ -41,7 +45,7 @@ public class CommentMigrationProcessor implements ItemProcessor<Comment, Comment
 
         log.info("Loaded {} existing comments mappings into cache", cache.size());
 
-        bookCache = resolver.resolveBookDocuments();
+        bookCache = resolveBookDocuments();
     }
 
     @Override
@@ -58,5 +62,32 @@ public class CommentMigrationProcessor implements ItemProcessor<Comment, Comment
     public void updateCacheBatch(Map<Long, String> newMappings) {
         cache.putAll(newMappings);
         log.info("Batch updated cache with {} new mappings", newMappings.size());
+    }
+
+    public Map<Long, BookDocument> resolveBookDocuments() {
+        Map<Long, String> bookMapping = bookMigrationProcessor.getCache();
+        return buildBookCache(bookMapping);
+    }
+
+    private Map<Long, BookDocument> buildBookCache(Map<Long, String> bookMappings) {
+        List<BookDocument> allBooks = bookRepository.findAll();
+
+        Map<String, Long> targetToSource = new HashMap<>();
+        for (Map.Entry<Long, String> entry : bookMappings.entrySet()) {
+            targetToSource.put(entry.getValue(), entry.getKey());
+        }
+
+        Map<Long, BookDocument> cache = new HashMap<>();
+        for (BookDocument book : allBooks) {
+            Long sourceId = targetToSource.get(book.getId());
+            if (sourceId != null) {
+                cache.put(sourceId, book);
+            } else {
+                log.warn("Book with targetId {} has no sourceId mapping", book.getId());
+            }
+        }
+
+        log.info("Build book cache with {} entries", cache.size());
+        return cache;
     }
 }

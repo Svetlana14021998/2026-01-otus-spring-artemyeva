@@ -1,5 +1,6 @@
 package ru.otus.hw.migration.processor;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.annotation.BeforeStep;
@@ -24,6 +25,7 @@ public class AuthorMigrationProcessor implements ItemProcessor<Author, AuthorDoc
 
     private final MigrationTableService migrationTableService;
 
+    @Getter
     private final Map<Long, String> cache = new ConcurrentHashMap<>();
 
     @BeforeStep
