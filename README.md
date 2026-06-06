@@ -17,4 +17,5 @@
 <h4>hw-11 - Домашняя работа по теме "Spring WebFlux"</h4>
 <h4>hw-12 - Домашняя работа по теме "Spring Security: Механизмы аутентификации"</h4>
 <h4>hw-13 - Домашняя работа по теме "Spring Security: ACL"</h4>
+<h4>hw-14 - Домашняя работа по теме "Spring Batch"</h4>
 <h4>hw-15 - Домашняя работа по теме "Spring Integration"</h4>
