@@ -32,7 +32,7 @@ management:
     web:
       base-path: "/application-check"
       exposure:
-        include: "*"
+        include: "flyway, health,metrics,logfile"
   endpoint:
     health:
       show-details: when-authorized
@@ -42,3 +42,7 @@ management:
   health:
     defaults:
       enabled: true
+
+logging:
+  file:
+    name: ./logs/library.log

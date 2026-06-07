@@ -79,6 +79,11 @@ public class BookServiceImpl implements BookService {
         aclServiceWrapperService.deletePermissions(book);
     }
 
+    @Override
+    public boolean hasAnyBook() {
+        return bookRepository.hasAnyBook();
+    }
+
     private Book save(BookDto bookDto) {
         long authorId = bookDto.getAuthor().getId();
         var author = authorRepository.findById(authorId)
