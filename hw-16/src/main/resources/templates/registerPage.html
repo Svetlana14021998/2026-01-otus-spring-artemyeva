@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <title th:text="#{registration}">Registration</title>
+</head>
+<body>
+<div class="topnav">
+    <div class="topnav-links">
+        <a th:href="@{/main}" href="#" th:text="#{main}">Main</a>
+        <a th:href="@{/books}" href="#" th:text="#{books}">Books</a>
+        <a th:href="@{/authors}" href="#" th:text="#{authors}">Authors</a>
+        <a th:href="@{/genres}" href="#" th:text="#{genres}">Genres</a>
+    </div>
+    <div class="topnav-lang">
+        <a th:href="@{/register(lang=en)}" class="lang-link" title="English">
+            <span class="fi fi-gb"></span>
+        </a>
+        <a th:href="@{/register(lang=ru)}" class="lang-link" title="Русский">
+            <span class="fi fi-ru"></span>
+        </a>
+    </div>
+</div>
+
+<div class="full-page-bg">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 th:text="#{registration}">Registration</h1>
+
+            <div id="success-message" class="success-message" style="display: none;">
+                <span th:text="#{register_success}">Registration successful! Redirecting to login...</span>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username" th:text="#{username}">Username</label>
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           placeholder="Enter username">
+                    <div id="username-error" class="field-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" th:text="#{password}">Password</label>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           placeholder="Enter password">
+                    <div id="password-error" class="field-error"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-register" th:text="#{registerBtn}">Register</button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <span th:text="#{have_account}">Already have an account?</span>
+                <a th:href="@{/login}" th:text="#{login}">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function clearErrors() {
+        document.querySelectorAll('.field-error').forEach(el => {
+            el.textContent = '';
+            el.classList.remove('errors');
+        });
+        const errorDiv = document.getElementById('error-message');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+    }
+
+    function showBackendErrors(errorData) {
+        if (errorData.errors) {
+            Object.keys(errorData.errors).forEach(field => {
+                let errorId;
+                switch(field) {
+                    case 'username':
+                        errorId = 'username-error';
+                        break;
+                    case 'password':
+                        errorId = 'password-error';
+                        break;
+                    default:
+                        errorId = field + '-error';
+                }
+                const errorElement = document.getElementById(errorId);
+                if (errorElement) {
+                    errorElement.textContent = errorData.errors[field];
+                    errorElement.classList.add('errors');
+                }
+            });
+        } else if (errorData.message) {
+            const firstError = document.querySelector('.field-error');
+            if (firstError) {
+                firstError.textContent = errorData.message;
+                firstError.classList.add('errors');
+            }
+        }
+    }
+
+    function showSuccessAndRedirect(username) {
+        const successMessage = document.getElementById('success-message');
+        const successSpan = successMessage.querySelector('span');
+
+        let messageTemplate = successSpan.textContent;
+        const finalMessage = messageTemplate.replace('{0}', username);
+
+         successSpan.textContent = finalMessage;
+         successMessage.style.display = 'block';
+
+        document.getElementById('registerForm').reset();
+
+        setTimeout(() => {
+            window.location.href = '/login?registered';
+        }, 2000);
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+            const response = await fetch('/api/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if(response.ok){
+             const username = await response.text();
+             showSuccessAndRedirect(username);
+            }else  {
+                const data = await response.json();
+                showBackendErrors(data);
+            }
+    });
+</script>
+</body>
+</html>
