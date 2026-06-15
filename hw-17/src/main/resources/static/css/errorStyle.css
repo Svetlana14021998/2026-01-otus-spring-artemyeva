@@ -1,0 +1,77 @@
+/* error.css - Стили для страницы ошибки */
+
+/* Контейнер ошибки - центрирование */
+.error-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 20px;
+}
+
+/* Окно ошибки */
+.error-container {
+    max-width: 550px;
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    text-align: center;
+    padding: 50px 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Иконка ошибки */
+.error-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+/* Заголовок ошибки */
+.error-title {
+    font-size: 28px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 16px;
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+/* Кнопка возврата */
+.back-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.back-button:active {
+    transform: translateY(0);
+}
+
+/* Дополнительный код ошибки */
+.error-code {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #999;
+    font-family: monospace;
+}

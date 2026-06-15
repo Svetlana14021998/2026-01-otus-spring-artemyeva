@@ -1,0 +1,238 @@
+/* styles.css - Стили для страниц со списками (Books, Authors, Genres, Comments) */
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.add-book-container {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+.add-book-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+    box-shadow: 0 4px 15px rgba(241, 39, 17, 0.4);
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.add-book-btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #ffc247 0%, #ff4a2a 100%);
+    box-shadow: 0 6px 20px rgba(241, 39, 17, 0.6);
+}
+
+.add-book-btn:active {
+    transform: translateY(0);
+}
+
+.add-icon {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Контейнеры таблиц */
+.books-container,
+.authors-container,
+.genres-container,
+.comments-container {
+    background: transparent;
+    border-radius: 12px;
+    overflow-x: auto;
+    display: inline-block;
+    width: auto;
+    min-width: 300px;
+    max-width: 100%;
+}
+
+/* Таблицы */
+.books,
+.authors,
+.genres,
+.comments {
+    width: auto;
+    min-width: 500px;
+    border-collapse: collapse;
+    font-size: 15px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Шапка таблицы (объединено) */
+.books thead tr,
+.authors thead tr,
+.genres thead tr,
+.comments thead tr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: sticky;
+    top: 0;
+}
+
+.books thead th,
+.authors thead th,
+.genres thead th,
+.comments thead th {
+    color: #ffcd94;
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Ячейки (объединено) */
+.books td,
+.authors td,
+.genres td,
+.comments td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: bold;
+    color: #000000;
+}
+
+/* Первая колонка ID (объединено) */
+.books tbody td:first-child,
+.authors tbody td:first-child,
+.genres tbody td:first-child,
+.comments tbody td:first-child {
+    color: #667eea;
+    font-weight: bold;
+    width: 80px;
+}
+
+/* Четные строки (объединено) */
+.books tbody tr:nth-child(even),
+.authors tbody tr:nth-child(even),
+.genres tbody tr:nth-child(even),
+.comments tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Ховер строк (объединено) */
+.books tbody tr:hover,
+.authors tbody tr:hover,
+.genres tbody tr:hover,
+.comments tbody tr:hover {
+    background-color: #f0e6ff;
+    transition: background-color 0.2s ease;
+}
+
+/* Заголовок caption (объединено) */
+.books caption,
+.authors caption,
+.genres caption,
+.comments caption {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 24px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    caption-side: top;
+    border-radius: 12px 12px 0 0;
+    letter-spacing: 0.3px;
+}
+
+/* Кнопки внутри таблицы книг (только для книг) */
+.books button {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.books button:hover {
+    background-color: #ee5a5a;
+    box-shadow: 0 2px 6px rgba(238, 90, 90, 0.4);
+}
+
+/* Пустые комментарии (только для страницы комментариев) */
+.empty-comments {
+    text-align: center;
+    padding: 60px 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.empty-comments h2 {
+    font-size: 24px;
+    color: #2c3e2f;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.empty-comments-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-comments h3 {
+    font-size: 22px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.empty-comments p {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+/* Скроллбары (для всех контейнеров) */
+.books-container::-webkit-scrollbar,
+.authors-container::-webkit-scrollbar,
+.genres-container::-webkit-scrollbar,
+.comments-container::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.books-container::-webkit-scrollbar-track,
+.authors-container::-webkit-scrollbar-track,
+.genres-container::-webkit-scrollbar-track,
+.comments-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.books-container::-webkit-scrollbar-thumb,
+.authors-container::-webkit-scrollbar-thumb,
+.genres-container::-webkit-scrollbar-thumb,
+.comments-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.books-container::-webkit-scrollbar-thumb:hover,
+.authors-container::-webkit-scrollbar-thumb:hover,
+.genres-container::-webkit-scrollbar-thumb:hover,
+.comments-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
