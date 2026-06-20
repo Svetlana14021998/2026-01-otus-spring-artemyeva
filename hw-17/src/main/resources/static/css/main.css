@@ -1,0 +1,85 @@
+.content {
+    max-width: 600px;
+    margin: 50px auto 0;
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.content h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.content p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.content span {
+    color: #666;
+    font-size: 14px;
+}
+
+.content a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.content a:hover {
+    text-decoration: underline;
+}
+
+.content a[href*="login"],
+.content a[href*="register"] {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 0 5px;
+}
+
+.content a[href*="login"]:hover,
+.content a[href*="register"]:hover {
+    text-decoration: none;
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+/* Анимация для сообщения */
+.success-message {
+    background: #e8f5e9;
+    color: #4caf50;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-left: 4px solid #4caf50;
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
