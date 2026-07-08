@@ -1,0 +1,7 @@
+/* createStyle.css - Специфичные стили для страницы создания книги */
+
+/* Стили для пустого/заглушечного option в select (подсказка "Select author") */
+select option[value=""][disabled] {
+    color: #999;
+    font-style: italic;
+}
