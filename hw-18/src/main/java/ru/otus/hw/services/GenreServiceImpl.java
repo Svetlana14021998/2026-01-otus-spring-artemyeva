@@ -32,7 +32,6 @@ public class GenreServiceImpl implements GenreService {
     }
 
     public List<GenreDto> findAllFallback(Throwable ex) {
-        log.error("Fallback for findAll triggered: {}", ex.getMessage());
         return Collections.emptyList();
     }
 }

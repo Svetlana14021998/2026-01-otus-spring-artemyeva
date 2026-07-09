@@ -32,7 +32,6 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     public List<AuthorDto> findAllFallback(Throwable ex) {
-        log.error("Fallback for findAll triggered: {}", ex.getMessage());
         return Collections.emptyList();
     }
 }

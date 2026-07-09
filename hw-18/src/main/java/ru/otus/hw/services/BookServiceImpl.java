@@ -48,6 +48,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public BookDto findById(long id) {
+        log.info("find book by id {}", id);
         Optional<Book> book = bookRepository.findById(id);
         return converter.convert(book
             .orElseThrow(() -> new EntityNotFoundException("Books with id=%d not found!".formatted(id))));
@@ -59,6 +60,7 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     @Override
     public List<BookDto> findAll() {
+        log.info("find all books");
         List<Book> books = bookRepository.findAll();
         return new ArrayList<>(books.stream()
             .map(converter::convert)
@@ -70,6 +72,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public BookDto insert(BookDto bookDto) {
+        log.info("create new book");
         Book book = save(bookDto);
         aclServiceWrapperService.createPermission(book, BasePermission.READ);
         return converter.convert(book);
@@ -80,6 +83,7 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public BookDto update(BookDto bookDto) {
+        log.info("update book with id {}", bookDto.getId());
         return converter.convert(save(bookDto));
     }
 
@@ -88,6 +92,7 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void deleteById(long id) {
+        log.info("delete book with id {}", id);
         Book book = bookRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Books with id=%d not found!".formatted(id)));
         bookRepository.delete(book);
@@ -118,31 +123,25 @@ public class BookServiceImpl implements BookService {
     }
 
     public BookDto findByIdFallback(long id, Throwable ex) {
-        log.error("Fallback for findById({}) triggered: {}", id, ex.getMessage());
         return null;
     }
 
     public List<BookDto> findAllFallback(Throwable ex) {
-        log.error("Fallback for findAll triggered: {}", ex.getMessage());
         return List.of();
     }
 
     public BookDto insertFallback(BookDto bookDto, Throwable ex) {
-        log.error("Fallback for insert triggered: {}", ex.getMessage());
         return null;
     }
 
     public BookDto updateFallback(BookDto bookDto, Throwable ex) {
-        log.error("Fallback for update triggered: {}", ex.getMessage());
         return null;
     }
 
     public void deleteFallback(long id, Throwable ex) {
-        log.error("Fallback for deleteById({}) triggered: {}", id, ex.getMessage());
     }
 
     public boolean hasAnyBookFallback(Throwable ex) {
-        log.error("Fallback for hasAnyBook triggered: {}", ex.getMessage());
         return false;
     }
 }

@@ -34,6 +34,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public Optional<CommentDto> findById(long id) {
+        log.info("find comment by id {}", id);
         Optional<Comment> comment = commentRepository.findById(id);
         return Optional.ofNullable(converter.convert(comment.orElse(null)));
     }
@@ -43,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public List<CommentDto> findAllByBookId(long bookId) {
+        log.info("find comments for book with id {}", bookId);
         if (!bookRepository.existsById(bookId)) {
             throw new EntityNotFoundException("Book with id=%d not found!".formatted(bookId));
         }
@@ -56,6 +58,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public CommentDto insert(String text, long bookId) {
+        log.info("create new comment for book with id {}", bookId);
         Book book = bookRepository.findById(bookId)
             .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
         Comment comment = commentRepository.save(new Comment(0L, text, book));
@@ -67,6 +70,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public CommentDto update(long id, String newText, long newBookId) {
+        log.info("update comment with id {}", id);
         Book book = bookRepository.findById(newBookId)
             .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(newBookId)));
         Comment comment = commentRepository.save(new Comment(id, newText, book));
@@ -78,30 +82,26 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void deleteById(long id) {
+        log.info("delete comment with id {}", id);
         commentRepository.deleteById(id);
     }
 
     public Optional<CommentDto> findByIdFallback(long id, Throwable ex) {
-        log.error("Fallback for findById({}) triggered: {}", id, ex.getMessage());
         return Optional.empty();
     }
 
     public List<CommentDto> findAllByBookIdFallback(long bookId, Throwable ex) {
-        log.error("Fallback for findAllByBookId({}) triggered: {}", bookId, ex.getMessage());
         return new ArrayList<>();
     }
 
     public CommentDto insertFallback(String text, long bookId, Throwable ex) {
-        log.error("Fallback for insert(text='{}', bookId={}) triggered: {}", text, bookId, ex.getMessage());
         return null;
     }
 
     public CommentDto updateFallback(long id, String newText, long newBookId, Throwable ex) {
-        log.error("Fallback for update(id={}, newBookId={}) triggered: {}", id, newBookId, ex.getMessage());
         return null;
     }
 
     public void deleteByIdFallback(long id, Throwable ex) {
-        log.error("Fallback for deleteById({}) triggered: {}", id, ex.getMessage());
     }
 }
