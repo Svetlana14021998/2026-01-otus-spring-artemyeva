@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Редактирование курса</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/teacher/edit-course.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')" class="active">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="edit-course-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>✏️ Редактирование курса</h1>
+            <p>Измените информацию о курсе</p>
+        </div>
+
+        <form id="courseForm" th:action="@{/teacher/courses/edit}" method="post" class="edit-course-form">
+            <input type="hidden" name="id" th:value="${course != null ? course.id : ''}">
+
+            <div class="form-group" th:classappend="${errors != null && errors.containsKey('courseType')} ? 'has-error' : ''">
+                <label for="courseType">Тип курса</label>
+                <select id="courseType" name="courseType" class="form-control"
+                        th:classappend="${errors != null && errors.containsKey('courseType')} ? 'input-error' : ''">
+                    <option value="">Выберите тип курса</option>
+                    <option th:each="type : ${courseTypes}"
+                            th:value="${type}"
+                            th:text="${type.description}"
+                            th:selected="${course != null && course.courseType == type}">
+                    </option>
+                </select>
+                <div th:if="${errors != null && errors.containsKey('courseType')}" class="field-error">
+                    <span th:text="${errors['courseType']}"></span>
+                </div>
+                <span class="helper-text">Выберите основную тему курса</span>
+            </div>
+
+            <div class="form-group" th:classappend="${errors != null && errors.containsKey('description')} ? 'has-error' : ''">
+                <label for="description">Описание курса</label>
+                <textarea id="description" name="description" class="form-control" rows="4"
+                          th:classappend="${errors != null && errors.containsKey('description')} ? 'input-error' : ''"
+                          th:text="${course != null ? course.description : ''}"
+                          placeholder="Введите описание курса..."></textarea>
+                <div th:if="${errors != null && errors.containsKey('description')}" class="field-error">
+                    <span th:text="${errors['description']}"></span>
+                </div>
+                <span class="helper-text">Краткое описание того, что будет изучаться в курсе</span>
+            </div>
+
+            <div class="form-group" th:classappend="${errors != null && errors.containsKey('theoryMaterials')} ? 'has-error' : ''">
+                <label>Страницы курса</label>
+                <div th:if="${errors != null && errors.containsKey('theoryMaterials')}" class="field-error" style="margin-bottom: 12px;">
+                    <span th:text="${errors['theoryMaterials']}"></span>
+                </div>
+                <div id="materialsContainer">
+                    <div th:if="${course != null and course.theoryMaterials != null}">
+                        <div th:each="content, iter : ${course.theoryMaterials}"
+                             th:id="'material-' + ${iter.index + 1}"
+                             class="material-block">
+                            <div class="material-header">
+                                <span class="material-number" th:text="'Страница ' + ${iter.index + 1}">Страница 1</span>
+                                <button type="button" class="btn-remove-material"
+                                        th:onclick="'removeMaterial(' + ${iter.index + 1} + ')'"
+                                        title="Удалить страницу">
+                                    🗑️
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label>Содержание страницы</label>
+                                <div class="editor-wrapper">
+                                    <div th:id="'editor-' + ${iter.index + 1}" class="editor-container"></div>
+                                    <input type="hidden" th:id="'material-content-' + ${iter.index + 1}"
+                                           name="theoryMaterials"
+                                           th:value="${content}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-material" onclick="addMaterial()">
+                    <span>➕</span> Добавить страницу
+                </button>
+                <span class="helper-text">Каждая страница — это отдельный материал для изучения</span>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/teacher/courses}" class="btn-cancel">Отмена</a>
+                <button type="submit" class="btn-submit">Сохранить изменения</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script>
+    let materialCount = 0;
+    const quillEditors = [];
+
+    const toolbarOptions = [
+        [{ 'header': [2, 3, 4, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['link', 'image', 'video'],
+        ['clean']
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const existingMaterials = document.querySelectorAll('.material-block');
+
+        if (existingMaterials.length > 0) {
+            existingMaterials.forEach(function(block, index) {
+                const id = index + 1;
+                const contentInput = document.getElementById('material-content-' + id);
+
+                setTimeout(function() {
+                    const editorElement = document.getElementById('editor-' + id);
+                    if (editorElement) {
+                        const quill = new Quill(editorElement, {
+                            theme: 'snow',
+                            modules: {
+                                toolbar: toolbarOptions
+                            },
+                            placeholder: 'Введите содержание страницы...'
+                        });
+
+                        if (contentInput && contentInput.value) {
+                            quill.root.innerHTML = contentInput.value;
+                        }
+
+                        quill.on('text-change', function() {
+                            saveEditorData(quill, id);
+                        });
+
+                        quillEditors.push({
+                            id: id,
+                            quill: quill
+                        });
+                    }
+                }, 100);
+            });
+
+            materialCount = existingMaterials.length;
+        } else {
+            addMaterial();
+        }
+    });
+
+    function addMaterial() {
+        materialCount++;
+        const container = document.getElementById('materialsContainer');
+
+        const materialDiv = document.createElement('div');
+        materialDiv.className = 'material-block';
+        materialDiv.id = 'material-' + materialCount;
+
+        materialDiv.innerHTML = `
+            <div class="material-header">
+                <span class="material-number">Страница ${materialCount}</span>
+                <button type="button" class="btn-remove-material" onclick="removeMaterial(${materialCount})" title="Удалить страницу">
+                    🗑️
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Содержание страницы</label>
+                <div class="editor-wrapper">
+                    <div id="editor-${materialCount}" class="editor-container"></div>
+                    <input type="hidden" id="material-content-${materialCount}" name="theoryMaterials" value="">
+                </div>
+            </div>
+        `;
+
+        container.appendChild(materialDiv);
+        setTimeout(() => {
+            initQuill(materialCount);
+        }, 100);
+    }
+
+    function removeMaterial(id) {
+
+        const editorIndex = quillEditors.findIndex(e => e.id === id);
+        if (editorIndex !== -1) {
+            saveEditorData(quillEditors[editorIndex].quill, id);
+            quillEditors.splice(editorIndex, 1);
+        }
+
+        const element = document.getElementById('material-' + id);
+        element.remove();
+        materialCount--;
+        renumberMaterials();
+    }
+
+    function renumberMaterials() {
+        const blocks = document.querySelectorAll('.material-block');
+        blocks.forEach((block, index) => {
+            const number = block.querySelector('.material-number');
+            if (number) {
+                number.textContent = 'Страница ' + (index + 1);
+            }
+        });
+    }
+
+    function initQuill(id) {
+        const editorElement = document.getElementById('editor-' + id);
+        if (!editorElement) {
+            console.error('Editor element not found for id:', id);
+            return;
+        }
+
+        try {
+            const quill = new Quill(editorElement, {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+                placeholder: 'Введите содержание страницы...'
+            });
+
+            quill.on('text-change', function() {
+                saveEditorData(quill, id);
+            });
+
+            quillEditors.push({
+                id: id,
+                quill: quill
+            });
+        } catch (error) {
+            console.error('Ошибка инициализации Quill для страницы', id, error);
+        }
+    }
+
+    function saveEditorData(quill, id) {
+        const content = quill.root.innerHTML;
+        const hiddenInput = document.getElementById('material-content-' + id);
+        if (hiddenInput) {
+            hiddenInput.value = content;
+        }
+    }
+
+    document.getElementById('courseForm').addEventListener('submit', function(e) {
+        quillEditors.forEach(function(item) {
+            saveEditorData(item.quill, item.id);
+        });
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            document.getElementById('courseForm').dispatchEvent(new Event('submit'));
+        }
+    });
+</script>
+
+</body>
+</html>

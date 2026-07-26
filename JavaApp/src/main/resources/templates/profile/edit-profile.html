@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Редактирование профиля</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/profile/edit-profile.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile active">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="edit-profile-page">
+    <div class="edit-profile-container">
+        <div class="edit-profile-card">
+
+            <div class="edit-profile-header">
+                <div class="logo">
+                    <span class="logo-icon">✏️</span>
+                    <span class="logo-text">JavaLearn</span>
+                </div>
+                <h2>Редактирование профиля</h2>
+                <p>Измените свои данные</p>
+            </div>
+
+            <div th:if="${error}" class="error-message">
+                <span>❌</span>
+                <span th:text="${error}"></span>
+            </div>
+
+            <form th:action="@{/profile/edit}" th:object="${user}" method="post" enctype="multipart/form-data" class="edit-profile-form">
+
+                <input type="hidden" name="id" th:value="${user.id}">
+                <input type="hidden" name="pathToPhoto" th:value="${user.pathToPhoto}">
+                <input type="hidden" name="isActive" value="true">
+                <input type="hidden" name="role" th:value="${user.role}">
+
+                <div class="form-group avatar-group">
+                    <label>Фото профиля</label>
+                    <div class="avatar-upload">
+                        <div class="avatar-preview">
+                            <img id="avatarPreview"
+                                 th:src="@{${user.pathToPhoto != null && user.pathToPhoto != '' ? user.pathToPhoto : '/images/users/default-avatar.jpg'}}"
+                                 th:alt="${user.fullName}"
+                                 onerror="this.onerror=null; this.src='/images/users/default-avatar.jpg'">
+                        </div>
+                        <div class="avatar-upload-btn">
+                            <label for="photoFile" class="btn-upload">
+                                📁 Выбрать фото
+                            </label>
+                            <input type="file" id="photoFile" name="photoFile" accept="image/*" style="display: none;">
+                            <span class="upload-hint">PNG, JPG, JPEG (макс. 5MB)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">👤 Полное имя</label>
+                    <input type="text" id="fullName" th:field="*{fullName}" placeholder="Введите полное имя">
+                    <span th:if="${#fields.hasErrors('fullName')}" class="field-error" th:errors="*{fullName}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 Email</label>
+                    <input type="email" id="email" th:field="*{email}" placeholder="example@mail.ru">
+                    <span th:if="${#fields.hasErrors('email')}" class="field-error" th:errors="*{email}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">📱 Телефон</label>
+                    <input type="tel" id="phone" th:field="*{phone}" placeholder="+7 (999) 123-45-67">
+                    <span th:if="${#fields.hasErrors('phone')}" class="field-error" th:errors="*{phone}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthday">🎂 Дата рождения</label>
+                    <input type="date" id="birthday" th:field="*{birthday}" th:value="${#temporals.format(user.birthday, 'yyyy-MM-dd')}">
+                    <span th:if="${#fields.hasErrors('birthday')}" class="field-error" th:errors="*{birthday}"></span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">💾 Сохранить изменения</button>
+                    <a th:href="@{/profile}" class="btn-cancel">Отмена</a>
+                </div>
+            </form>
+
+            <div class="edit-profile-footer">
+                <a th:href="@{/profile}">← Вернуться в профиль</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var fileInput = document.getElementById('photoFile');
+        var avatarPreview = document.getElementById('avatarPreview');
+
+        if (fileInput && avatarPreview) {
+            fileInput.addEventListener('change', function(e) {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        avatarPreview.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

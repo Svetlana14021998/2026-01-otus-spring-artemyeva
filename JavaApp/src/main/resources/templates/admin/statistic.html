@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Статистика</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/statistic.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')" class="active">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="statistic-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>📊 Статистика</h1>
+            <p>Общая статистика платформы</p>
+        </div>
+
+        <div class="statistic-cards">
+            <div class="stat-card">
+                <div class="stat-card-icon">📝</div>
+                <div class="stat-card-content">
+                    <div class="stat-card-value" th:text="${averagePassPercentage != null ? averagePassPercentage + '%' : '—'}">—</div>
+                    <div class="stat-card-label">Средний процент прохождения тестов</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">📚</span>
+                    <span class="accordion-title">Статистика по типам курсов</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${averagePercentageByCourseType != null && !averagePercentageByCourseType.isEmpty()}">
+                        <table class="stat-table stat-table-striped">
+                            <thead>
+                            <tr>
+                                <th>Тип курса</th>
+                                <th>Средний процент прохождения</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="entry : ${averagePercentageByCourseType}">
+                                <td><span class="type-badge" th:text="${entry.key.getDescription()}"></span></td>
+                                <td>
+                                    <div th:with="percent=${entry.value}">
+                                        <th:block th:if="${percent != null}">
+                                            <div class="metric-wrapper">
+                                                <span class="percentage-value" th:text="${percent + '%'}"></span>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill"
+                                                         th:style="'width: ' + ${percent} + '%'"
+                                                         th:classappend="${percent >= 70} ? 'progress-high' : (${percent >= 50} ? 'progress-medium' : 'progress-low')">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                        <span th:if="${percent == null}" class="empty-value">—</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${averagePercentageByCourseType == null || averagePercentageByCourseType.isEmpty()}">
+                        <p class="empty-message">Нет данных для отображения</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">📝</span>
+                    <span class="accordion-title">Статистика по тестам</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${averagePercentageByTest != null && !averagePercentageByTest.isEmpty()}">
+                        <table class="stat-table stat-table-striped">
+                            <thead>
+                            <tr>
+                                <th>Название теста</th>
+                                <th>Средний процент прохождения</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="entry : ${averagePercentageByTest}">
+                                <td th:text="${entry.key}"></td>
+                                <td>
+                                    <div th:with="percent=${entry.value}">
+                                        <th:block th:if="${percent != null}">
+                                            <div class="metric-wrapper">
+                                                <span class="percentage-value" th:text="${percent + '%'}"></span>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill"
+                                                         th:style="'width: ' + ${percent} + '%'"
+                                                         th:classappend="${percent >= 70} ? 'progress-high' : (${percent >= 50} ? 'progress-medium' : 'progress-low')">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                        <span th:if="${percent == null}" class="empty-value">—</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${averagePercentageByTest == null || averagePercentageByTest.isEmpty()}">
+                        <p class="empty-message">Нет данных для отображения</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">⚠️</span>
+                    <span class="accordion-title">Курсы без тестов</span>
+                    <span class="accordion-badge" th:text="${coursesWithoutTests != null ? coursesWithoutTests.size() : 0}">0</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${coursesWithoutTests != null && !coursesWithoutTests.isEmpty()}">
+                        <table class="stat-table stat-table-striped-warning">
+                            <thead>
+                            <tr>
+                                <th>Тип курса</th>
+                                <th>Описание</th>
+                                <th>Преподаватель</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="course : ${coursesWithoutTests}">
+                                <td><span class="type-badge" th:text="${course.courseType.getDescription()}"></span></td>
+                                <td th:text="${course.description != null ? course.description : '—'}"></td>
+                                <td th:text="${course.teacher != null && course.teacher.fullName != null ? course.teacher.fullName : '—'}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${coursesWithoutTests == null || coursesWithoutTests.isEmpty()}">
+                        <p class="empty-message success">✅ Все курсы имеют тесты!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">📋</span>
+                    <span class="accordion-title">Типы курсов без курсов</span>
+                    <span class="accordion-badge" th:text="${courseTypeWithoutCourses != null ? courseTypeWithoutCourses.size() : 0}">0</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${courseTypeWithoutCourses != null && !courseTypeWithoutCourses.isEmpty()}">
+                        <table class="stat-table stat-table-centered stat-table-striped">
+                            <thead>
+                            <tr>
+                                <th>Тип курса</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="courseType : ${courseTypeWithoutCourses}">
+                                <td class="missing-type-cell" th:text="${courseType.getDescription()}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${courseTypeWithoutCourses == null || courseTypeWithoutCourses.isEmpty()}">
+                        <p class="empty-message success">✅ Все типы курсов имеют хотя бы один курс!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">👨‍🏫</span>
+                    <span class="accordion-title">Количество курсов у преподавателей</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${teachersCourseCount != null && !teachersCourseCount.isEmpty()}">
+                        <table class="stat-table stat-table-striped">
+                            <thead>
+                            <tr>
+                                <th>Преподаватель</th>
+                                <th>Количество курсов</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="entry : ${teachersCourseCount}">
+                                <td><span class="teacher-name" th:text="${entry.key.fullName}"></span></td>
+                                <td>
+                                    <div th:with="count=${entry.value}">
+                                        <div class="metric-wrapper">
+                                            <span class="count-value" th:text="${count}"></span>
+                                            <div class="progress-bar">
+                                                <div class="progress-fill"
+                                                     th:style="'width: ' + ${count > 100 ? 100 : count} + '%'"
+                                                     th:classappend="${count >= 5} ? 'progress-high' : (${count >= 2} ? 'progress-medium' : 'progress-low')">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${teachersCourseCount == null || teachersCourseCount.isEmpty()}">
+                        <p class="empty-message">Нет данных о преподавателях</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">📊</span>
+                    <span class="accordion-title">Средний процент прохождения тестов у преподавателей</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                    <div th:if="${averagePercentageByTeacher != null && !averagePercentageByTeacher.isEmpty()}">
+                        <table class="stat-table stat-table-striped">
+                            <thead>
+                            <tr>
+                                <th>Преподаватель</th>
+                                <th>Средний процент прохождения</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="entry : ${averagePercentageByTeacher}">
+                                <td><span class="teacher-name" th:text="${entry.key.fullName}"></span></td>
+                                <td>
+                                    <div th:with="percent=${entry.value}">
+                                        <th:block th:if="${percent != null}">
+                                            <div class="metric-wrapper">
+                                                <span class="percentage-value" th:text="${percent + '%'}"></span>
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill"
+                                                         th:style="'width: ' + ${percent} + '%'"
+                                                         th:classappend="${percent >= 70} ? 'progress-high' : (${percent >= 50} ? 'progress-medium' : 'progress-low')">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                        <span th:if="${percent == null}" class="empty-value">—</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${averagePercentageByTeacher == null || averagePercentageByTeacher.isEmpty()}">
+                        <p class="empty-message">Нет данных о преподавателях</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function toggleAccordion(header) {
+        const item = header.closest('.accordion-item');
+        const body = item.querySelector('.accordion-body');
+        const arrow = header.querySelector('.accordion-arrow');
+
+        document.querySelectorAll('.accordion-item').forEach(function(otherItem) {
+            if (otherItem !== item) {
+                otherItem.classList.remove('active');
+                const otherBody = otherItem.querySelector('.accordion-body');
+                const otherArrow = otherItem.querySelector('.accordion-arrow');
+                if (otherBody) {
+                    otherBody.style.maxHeight = '0';
+                }
+                if (otherArrow) {
+                    otherArrow.textContent = '▼';
+                }
+            }
+        });
+
+        item.classList.toggle('active');
+
+        if (item.classList.contains('active')) {
+            body.style.maxHeight = body.scrollHeight + 'px';
+            arrow.textContent = '▲';
+        } else {
+            body.style.maxHeight = '0';
+            arrow.textContent = '▼';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstItem = document.querySelector('.accordion-item');
+        if (firstItem) {
+            const header = firstItem.querySelector('.accordion-header');
+            if (header) {
+                toggleAccordion(header);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

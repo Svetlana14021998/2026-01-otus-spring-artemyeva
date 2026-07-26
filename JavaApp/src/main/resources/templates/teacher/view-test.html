@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Просмотр теста</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/teacher/view-test.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')" class="active">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="view-test-page">
+    <div class="container">
+        <div class="page-header">
+            <div class="header-left">
+                <h1>👁️ Просмотр теста</h1>
+                <p>Информация о тесте</p>
+            </div>
+            <div class="header-right">
+                <a th:href="@{/teacher/tests}" class="btn-back">
+                    ← Назад к тестам
+                </a>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <div class="test-header">
+                <h2 class="test-title" th:text="${test.title}">Название теста</h2>
+                <div class="test-meta">
+                    <div class="meta-item">
+                        <span class="meta-icon">📝</span>
+                        <span class="meta-label">Вопросов:</span>
+                        <span class="meta-value" th:text="${test.questions.size()}">0</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">✅</span>
+                        <span class="meta-label">Для прохождения:</span>
+                        <span class="meta-value" th:text="${test.needCorrectAnswerCount} + ' из ' + ${test.questions.size()}">3 из 5</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">📚</span>
+                        <span class="meta-label">Курс:</span>
+                        <a th:href="@{/teacher/courses/view/{id}(id=${test.courseId})}" class="meta-link">
+                            Перейти к курсу
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="questions-section">
+                <h3 class="section-title">📋 Вопросы</h3>
+
+                <div th:if="${test.questions != null and !test.questions.empty}">
+                    <div class="questions-list">
+                        <div class="question-item" th:each="question, iter : ${test.questions}">
+                            <div class="question-header">
+                                <span class="question-number">Вопрос <span th:text="${iter.index + 1}">1</span></span>
+                                <span class="question-type badge-hash" th:text="${question.questionType.description}">SINGLE_CHOICE</span>
+                            </div>
+
+                            <div class="question-text" th:text="${question.text}">Текст вопроса</div>
+
+                            <div class="answers-list">
+                                <div class="answer-item" th:each="answer : ${question.answers}">
+                                    <span class="answer-marker" th:classappend="${answer.isCorrect} ? 'answer-correct' : 'answer-wrong'">
+                                        <span th:if="${answer.isCorrect}">✅</span>
+                                        <span th:unless="${answer.isCorrect}">❌</span>
+                                    </span>
+                                    <span class="answer-text" th:text="${answer.text}">Текст ответа</span>
+                                    <span th:if="${answer.isCorrect}" class="answer-badge">Правильный</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:unless="${test.questions != null and !test.questions.empty}" class="empty-questions">
+                    <span class="empty-icon">📭</span>
+                    <p>Нет вопросов для этого теста</p>
+                </div>
+            </div>
+
+            <div class="test-actions">
+                <a th:href="@{/teacher/tests}" class="btn-action btn-back-action">
+                    ← Назад к тестам
+                </a>
+                <a th:href="@{/teacher/tests/edit/{id}(id=${test.id})}" class="btn-action btn-edit-action">
+                    ✏️ Редактировать
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/color-helper.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+    });
+</script>
+
+</body>
+</html>

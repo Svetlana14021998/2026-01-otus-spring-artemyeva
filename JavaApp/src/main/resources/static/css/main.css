@@ -1,0 +1,151 @@
+.hero {
+    padding: 40px 0 30px;
+}
+
+.hero-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: #d5dbdb;
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 20px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: #2c3e50;
+}
+
+.hero h1 .highlight {
+    color: #3498db;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #5d6d7e;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 500px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.hero-image {
+    flex: 1;
+    text-align: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+}
+
+.features {
+    padding: 60px 0;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.feature-item {
+    background: #ffffff;
+    padding: 28px 20px;
+    border-radius: 12px;
+    border: 1px solid #dce1e6;
+    transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border-color: #bdc3c7;
+}
+
+.feature-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.feature-item h5 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.feature-item p {
+    font-size: 14px;
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+.how-it-works {
+    padding: 60px 0;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.step-item {
+    text-align: center;
+    background: #ffffff;
+    padding: 30px 20px;
+    border-radius: 12px;
+    border: 1px solid #dce1e6;
+    transition: all 0.2s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.step-number {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background: #3498db;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 50px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+}
+
+.step-item h5 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.step-item p {
+    font-size: 15px;
+    color: #7f8c8d;
+}
