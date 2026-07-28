@@ -104,7 +104,7 @@
                     <a th:href="@{/profile/change-password}" class="btn-change-password">
                         🔑 Сменить пароль
                     </a>
-                    <button class="btn-delete" onclick="openDeleteModal()">
+                    <button class="btn-delete" onclick="openDeleteModal()"  sec:authorize="hasRole('USER')">
                         🗑️ Удалить профиль
                     </button>
                 </div>
