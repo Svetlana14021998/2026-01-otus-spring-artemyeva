@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Курс: <span th:text="${course.courseType.description}">Java</span></title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/courses/coursePage.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')" class="active">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="course-page">
+    <div class="container">
+        <div class="breadcrumbs">
+            <a th:href="@{/main}">Главная</a>
+            <span class="separator">›</span>
+            <a th:href="@{/courses}">Курсы</a>
+            <span class="separator">›</span>
+            <span class="current" th:text="${course.courseType.description}">Java</span>
+        </div>
+
+        <div class="course-header">
+            <div class="course-header-content">
+                <div class="course-badge-container">
+                    <span class="course-badge badge-hash" th:text="${course.courseType.description}">JAVA</span>
+
+                </div>
+                <h1 class="course-title" th:text="${course.courseType.description}">Принципы ООП</h1>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <span class="meta-icon">👨‍🏫</span>
+                        <span class="meta-label">Автор:</span>
+                        <span class="meta-value" th:text="${course.teacher.fullName}">Иван Петров</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">📖</span>
+                        <span class="meta-value" th:text="${course.materialsCount}">0</span>
+                        <span class="meta-label">материалов</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-header-actions">
+                <a th:href="@{/courses/{id}/learn(id=${course.id})}" class="btn-learn">
+                    🚀 Изучать курс
+                </a>
+            </div>
+        </div>
+
+        <div class="course-description-section">
+            <h2 class="section-title">📋 О курсе</h2>
+            <div class="course-description-content">
+                <p th:text="${course.description}">
+                    Подробное описание курса будет здесь.
+                </p>
+            </div>
+        </div>
+
+        <div class="course-stats-section">
+            <h2 class="section-title">📊 Статистика курса</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📖</div>
+                    <div class="stat-number" th:text="${course.materialsCount}">0</div>
+                    <div class="stat-label">Материалов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏷️</div>
+                    <div class="stat-number" th:text="${course.courseType.description}">JAVA</div>
+                    <div class="stat-label">Тип курса</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-actions-section">
+            <h2 class="section-title">🎯 Действия</h2>
+            <div class="actions-grid">
+                <a th:href="@{/courses/{id}/learn(id=${course.id})}" class="action-card action-learn">
+                    <div class="action-icon">🚀</div>
+                    <div class="action-title">Изучать курс</div>
+                    <div class="action-description">Перейти к изучению материалов курса</div>
+                </a>
+                <a   th:href="@{/tests/{testId}(testId=${course.testId})}"  class="action-card action-test" sec:authorize="hasRole('USER')">
+                    <div class="action-icon">📝</div>
+                    <div class="action-title">Пройти тест</div>
+                    <div class="action-description">Проверить свои знания по курсу</div>
+                </a>
+                <a th:href="@{/courses}" class="action-card action-back">
+                    <div class="action-icon">🔙</div>
+                    <div class="action-title">Вернуться к курсам</div>
+                    <div class="action-description">Посмотреть список всех курсов</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+<script th:src="@{/js/color-helper.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+    });
+</script>
+</body>
+</html>

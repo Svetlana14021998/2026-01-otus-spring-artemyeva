@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Регистрация успешно завершена</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f6f9fc; color: #2c3e50; line-height: 1.6; -webkit-font-smoothing: antialiased; margin: 0; padding: 0;">
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f6f9fc;">
+    <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e9ecef;">
+
+        <div style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); padding: 36px 40px 28px; text-align: center;">
+            <span style="font-size: 40px; display: block; margin-bottom: 8px;">☕</span>
+            <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">Добро пожаловать!</h1>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 4px 0 0;">Ваш аккаунт успешно создан</p>
+        </div>
+
+        <div style="padding: 32px 40px 28px;">
+
+            <p style="font-size: 18px; color: #2c3e50; margin-bottom: 4px;">
+                Здравствуйте, <strong style="color: #1a252f;" th:text="${data.username}">Иван</strong>!
+            </p>
+            <p style="font-size: 15px; color: #7f8c8d; margin-bottom: 24px;">
+                Благодарим вас за регистрацию на платформе JavaLearn.
+                Ваш аккаунт был успешно создан, и теперь вы можете начать изучение Java.
+            </p>
+
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; border-left: 4px solid #22c55e;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 15px;">
+                    <span style="color: #7f8c8d; font-weight: 500; min-width: 60px;">👤 Имя:</span>
+                    <span style="color: #2c3e50; font-weight: 500;" th:text="${data.username}">Иван Петров</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 15px;">
+                    <span style="color: #7f8c8d; font-weight: 500; min-width: 60px;">📧 Email:</span>
+                    <span style="color: #2c3e50; font-weight: 500;" th:text="${data.email}">ivan@example.com</span>
+                </div>
+            </div>
+
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px;">
+                <span style="font-size: 14px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; display: block;">📚 Что вас ждёт:</span>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: #475569;">
+                    <span style="font-size: 18px; width: 24px; text-align: center;">📖</span>
+                    <span>Структурированные материалы для изучения Java</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: #475569;">
+                    <span style="font-size: 18px; width: 24px; text-align: center;">📝</span>
+                    <span>Интерактивные тесты для проверки знаний</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: #475569;">
+                    <span style="font-size: 18px; width: 24px; text-align: center;">📊</span>
+                    <span>Отслеживание прогресса и достижений</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: #475569;">
+                    <span style="font-size: 18px; width: 24px; text-align: center;">👨‍🏫</span>
+                    <span>Поддержка опытных преподавателей</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 8px;">
+                <a th:href="${data.baseUrl} + '/login'" style="display: inline-block; background: #3498db; color: #ffffff; padding: 12px 36px; border-radius: 8px; font-size: 15px; font-weight: 600; text-decoration: none;">Войти в аккаунт</a>
+            </div>
+
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px 40px 24px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="font-size: 13px; color: #95a5a6; margin: 4px 0;">
+                Если у вас возникли вопросы, свяжитесь с нами по почте
+                <a th:href="'mailto:' + ${data.supportEmail}" th:text="${data.supportEmail}" style="color: #3498db; text-decoration: none;">support@javalearn.ru</a>
+            </p>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top: 8px;">Это письмо было отправлено автоматически. Не отвечайте на него.</p>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top: 8px;">
+                &copy; <span th:text="${#calendars.year(#calendars.createNow())}"></span> JavaLearn. Все права защищены.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

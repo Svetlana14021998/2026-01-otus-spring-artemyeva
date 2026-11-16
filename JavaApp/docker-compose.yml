@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: "postgres:14.5"
+    ports:
+    - "5433:5432"
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=java-learn
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d java-learn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  flyway:
+    image: flyway/flyway:latest
+    command: migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+    - FLYWAY_URL=jdbc:postgresql://postgres:5432/java-learn
+    - FLYWAY_USER=postgres
+    - FLYWAY_PASSWORD=postgres
+    - FLYWAY_LOCATIONS=filesystem:/flyway/sql
+    - FLYWAY_BASELINE_ON_MIGRATE=true
+    - FLYWAY_VALIDATE_ON_MIGRATE=true
+    volumes:
+    - ./src/main/resources/db/migration:/flyway/sql
+    restart: on-failure
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+    - "8080:8080"
+    environment:
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/java-learn
+    - SPRING_DATASOURCE_USERNAME=postgres
+    - SPRING_DATASOURCE_PASSWORD=postgres
+    - SPRING_FLYWAY_ENABLED=false
+    - ADMIN_EMAIL=${ADMIN_EMAIL}
+    - MAIL_USERNAME=${MAIL_USERNAME}
+    - MAIL_PASSWORD=${MAIL_PASSWORD}
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    restart: on-failure

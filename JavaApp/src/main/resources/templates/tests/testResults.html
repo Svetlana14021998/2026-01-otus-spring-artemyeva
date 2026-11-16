@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Мои результаты</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/tests/testResults.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')" >Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')" class="active">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="results-page">
+    <div class="container">
+        <div class="breadcrumbs">
+            <a th:href="@{/main}">Главная</a>
+            <span class="separator">›</span>
+            <a th:href="@{/tests}">Тесты</a>
+            <span class="separator">›</span>
+            <span class="current">Мои результаты</span>
+        </div>
+
+        <div class="results-header">
+            <div class="header-left">
+                <h1>📊 Мои результаты</h1>
+                <p>Статистика прохождения тестов</p>
+            </div>
+            <div class="header-right">
+                <a th:href="@{/tests}" class="btn-back">
+                    ← Назад к тестам
+                </a>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <form th:action="@{/tests/results}" method="get" class="filters-form">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="courseType">Тип курса</label>
+                        <select id="courseType" name="courseType" class="filter-select">
+                            <option value="">Все типы</option>
+                            <option th:each="type : ${courseType}"
+                                    th:value="${type}"
+                                    th:text="${type.description}"
+                                    th:selected="${param.courseType != null && param.courseType[0] == type.name()}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="testId">Тест</label>
+                        <select id="testId" name="testId" class="filter-select">
+                            <option value="">Все тесты</option>
+                            <option th:each="test : ${tests}"
+                                    th:value="${test.id}"
+                                    th:text="${test.title}"
+                                    th:selected="${param.testId != null && param.testId[0] == test.id.toString()}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="isPassed">Статус</label>
+                        <select id="isPassed" name="isPassed" class="filter-select">
+                            <option value="">Все результаты</option>
+                            <option value="true" th:selected="${param.isPassed != null && param.isPassed[0] == 'true'}">✅ Пройден</option>
+                            <option value="false" th:selected="${param.isPassed != null && param.isPassed[0] == 'false'}">❌ Не пройден</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group filter-checkbox">
+                        <label for="isOnlyLatestResults">Только последние результаты</label>
+                        <input type="checkbox" id="isOnlyLatestResults" name="isOnlyLatestResults" value="true"
+                               th:checked="${param.isOnlyLatestResults != null && param.isOnlyLatestResults[0] == 'true'}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="pageSize">Кол-во на странице</label>
+                        <select id="pageSize" name="pageSize" class="filter-select">
+                            <option value="5" th:selected="${param.pageSize != null && param.pageSize[0] == '5'}">5</option>
+                            <option value="10" th:selected="${param.pageSize != null && param.pageSize[0] == '10'}">10</option>
+                            <option value="20" th:selected="${param.pageSize != null && param.pageSize[0] == '20'}">20</option>
+                            <option value="50" th:selected="${param.pageSize != null && param.pageSize[0] == '50'}">50</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">Применить</button>
+                        <a th:href="@{/tests/results}" class="btn-reset">Сбросить</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-list" th:if="${results != null and !results.empty}">
+            <div class="result-card" th:each="result : ${results}">
+                <div class="result-card-header">
+                    <div class="result-title-wrapper">
+                        <div class="result-title-group">
+                            <span class="course-badge badge-hash" th:text="${result.courseType.description}">Java</span>
+                            <h3 class="result-title" th:text="${result.testTitle}">Тест по Java</h3>
+                        </div>
+                        <span class="result-badge" th:classappend="${result.passed} ? 'badge-passed' : 'badge-failed'">
+                            <span th:if="${result.passed}">✅ Пройден</span>
+                            <span th:unless="${result.passed}">❌ Не пройден</span>
+                        </span>
+                    </div>
+                    <div class="result-actions-header">
+                        <span class="result-date" th:text="${#temporals.format(result.passedDate, 'dd.MM.yyyy HH:mm')}">
+                            21.07.2026 15:30
+                        </span>
+                        <a th:href="@{/tests/{id}(id=${result.testId})}" class="btn-retry">
+                            🔄 Пройти заново
+                        </a>
+                    </div>
+                </div>
+
+                <div class="result-body">
+                    <div class="result-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Правильных ответов</span>
+                            <span class="stat-value" th:text="${result.correctAnswers} + ' из ' + ${result.totalQuestions}">
+                                5 из 10
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Результат</span>
+                            <span class="stat-value" th:text="${result.percentage} + '%'">50%</span>
+                        </div>
+                    </div>
+
+                    <div class="result-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"
+                                 th:style="'width: ' + ${result.percentage} + '%'"
+                                 th:classappend="${result.passed} ? 'progress-passed' : 'progress-failed'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-message"
+                         th:classappend="${result.passed} ? 'message-passed' : 'message-failed'"
+                         th:text="${result.message}">
+                        Сообщение
+                    </div>
+                </div>
+
+                <div class="result-card-footer">
+                    <a th:href="@{/courses/{id}(id=${result.courseId})}" class="btn-course">
+                        📚 К курсу
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${results == null or results.empty}">
+            <span class="empty-icon">📭</span>
+            <h3>Результатов пока нет</h3>
+            <p th:if="${param.courseType != null or param.testId != null or param.isPassed != null or param.isOnlyLatestResults != null}">
+                Попробуйте изменить параметры фильтрации
+            </p>
+            <p th:unless="${param.courseType != null or param.testId != null or param.isPassed != null or param.isOnlyLatestResults != null}">
+                Вы ещё не проходили ни одного теста.
+            </p>
+            <a th:href="@{/tests}" class="btn-back">
+                📝 Перейти к тестам
+            </a>
+        </div>
+
+        <div th:if="${results != null and !results.empty}" class="pagination-section">
+            <div class="pagination-info">
+                Показано <span th:text="${results.number + 1}">1</span> -
+                <span th:text="${results.number + results.numberOfElements}">0</span> из
+                <span th:text="${results.totalElements}">0</span> результатов
+            </div>
+            <div class="pagination">
+                <a th:href="@{/tests/results(courseType=${param.courseType != null ? param.courseType[0] : ''}, testId=${param.testId != null ? param.testId[0] : ''}, isPassed=${param.isPassed != null ? param.isPassed[0] : ''}, isOnlyLatestResults=${param.isOnlyLatestResults != null ? param.isOnlyLatestResults[0] : ''}, pageNumber=${results.number - 1}, pageSize=${param.pageSize != null ? param.pageSize[0] : 5})}"
+                   class="page-link"
+                   th:classappend="${!results.hasPrevious()} ? 'disabled' : ''">
+                    ← Назад
+                </a>
+
+                <span class="page-current" th:text="${results.number + 1}">1</span>
+
+                <a th:href="@{/tests/results(courseType=${param.courseType != null ? param.courseType[0] : ''}, testId=${param.testId != null ? param.testId[0] : ''}, isPassed=${param.isPassed != null ? param.isPassed[0] : ''}, isOnlyLatestResults=${param.isOnlyLatestResults != null ? param.isOnlyLatestResults[0] : ''}, pageNumber=${results.number + 1}, pageSize=${param.pageSize != null ? param.pageSize[0] : 5})}"
+                   class="page-link"
+                   th:classappend="${!results.hasNext()} ? 'disabled' : ''">
+                    Вперед →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/color-helper.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+    });
+</script>
+
+</body>
+</html>

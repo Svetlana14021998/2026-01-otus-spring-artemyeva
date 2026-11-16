@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация преподавателя</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background-color: #f6f9fc; line-height: 1.6; color: #2c3e50;">
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f6f9fc; padding: 20px 0;">
+    <tr>
+        <td align="center">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+
+                <tr>
+                    <td style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); padding: 32px 40px 28px; color: #ffffff;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td>
+                                    <span style="font-size: 32px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 32px;">☕</span> JavaLearn
+                                    </span>
+                                    <div style="font-size: 15px; opacity: 0.9; margin-top: 4px; font-weight: 400;">
+                                        Платформа для изучения Java
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 40px 40px 32px;">
+                        <h1 style="font-size: 22px; font-weight: 700; color: #2c3e50; margin: 0 0 8px 0;">
+                            Здравствуйте, <span style="color: #3498db;" th:text="${data.username}">Username</span>!
+                        </h1>
+                        <p style="font-size: 16px; color: #7f8c8d; margin: 0 0 24px 0;">
+                            Для вас создан профиль преподавателя на платформе JavaLearn.
+                        </p>
+
+                        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; border-left: 4px solid #3498db;">
+                            <h2 style="font-size: 16px; font-weight: 700; color: #2c3e50; margin: 0 0 12px 0;">
+                                🔑 Данные для входа
+                            </h2>
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td style="padding: 6px 0; font-weight: 600; color: #2c3e50; width: 120px;">Логин:</td>
+                                    <td style="padding: 6px 0; color: #2c3e50; font-weight: 500;" th:text="${data.username}">Username</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0; font-weight: 600; color: #2c3e50; width: 120px;">Пароль:</td>
+                                    <td style="padding: 6px 0; color: #2c3e50; font-weight: 500;" th:text="${data.password}">Password</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div style="background: #fef3c7; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="font-size: 20px;">⚠️</span>
+                                <div>
+                                    <strong style="color: #92400e; font-size: 15px;">Рекомендация по безопасности</strong>
+                                    <p style="color: #78350f; font-size: 14px; margin: 4px 0 0 0;">
+                                        После первого входа в систему <strong>обязательно смените пароль</strong>
+                                        на надежный и запомните его.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td align="center" style="padding: 8px 0 16px 0;">
+                                    <a th:href="${data.baseUrl}+'/login'" style="display: inline-block; background: #3498db; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 10px; font-size: 16px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);">
+                                        🚀 Войти в систему
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="background: #f0fdf4; border-radius: 12px; padding: 16px 20px; margin: 8px 0 0 0; border-left: 4px solid #22c55e;">
+                            <p style="color: #166534; font-size: 14px; margin: 0;">
+                                💡 После входа вы сможете создавать учебные материалы, тесты и управлять своими курсами.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 24px 40px 28px; background: #f8f9fa; border-top: 1px solid #e9ecef;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td style="font-size: 13px; color: #7f8c8d; text-align: center;">
+                                    <p style="margin: 0 0 4px 0;">
+                                        <span style="font-weight: 600; color: #2c3e50;">JavaLearn</span> — Изучай Java с удовольствием
+                                    </p>
+                                    <p style="font-size: 12px; color: #bdc3c7; margin-top: 8px;">
+                                        &copy; <span th:text="${#calendars.year(#calendars.createNow())}"></span> JavaLearn. Все права защищены.
+                                    </p>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px; color: #adb5bd;">
+                                        По всем вопросам обращайтесь:
+                                        <a th:href="'mailto:' + ${data.supportEmail}" th:text="${data.supportEmail}" style="color: #3498db; text-decoration: none;">support@javalearn.ru</a>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

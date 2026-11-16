@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Тест: <span th:text="${test.title}">Название теста</span></title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/tests/testPage.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')" class="active">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="test-page">
+    <div class="container">
+        <div class="breadcrumbs">
+            <a th:href="@{/main}">Главная</a>
+            <span class="separator">›</span>
+            <a th:href="@{/tests}">Тесты</a>
+            <span class="separator">›</span>
+            <span class="current" th:text="${test.title}">Название теста</span>
+        </div>
+
+        <div class="test-header">
+            <div class="test-header-left">
+                <h1 th:text="${test.title}">Название теста</h1>
+                <div class="test-info">
+                    <span class="test-info-item">
+                        📝 <span th:text="${test.questions.size()}">0</span> вопросов
+                    </span>
+                    <span class="test-info-item">
+                        ✅ Для прохождения: <span th:text="${test.needCorrectAnswerCount}">0</span> правильных ответов
+                    </span>
+                    <span class="test-info-item" id="progressInfo">
+                        ⏳ Прогресс: <span id="answeredCount">0</span> / <span th:text="${test.questions.size()}">0</span>
+                    </span>
+                </div>
+            </div>
+            <div class="test-header-right">
+                <button class="btn-submit" id="submitBtn" onclick="submitTest()">
+                    📤 Завершить тест
+                </button>
+            </div>
+        </div>
+
+        <div class="question-container" id="questionContainer">
+        </div>
+
+        <div class="navigation-section">
+            <button class="btn-nav btn-prev" id="prevBtn" onclick="prevQuestion()">
+                ← Назад
+            </button>
+
+            <div class="nav-indicators" id="navIndicators">
+            </div>
+
+            <button class="btn-nav btn-next" id="nextBtn" onclick="nextQuestion()">
+                Вперед →
+            </button>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/color-helper.js}"></script>
+<script th:inline="javascript">
+    const questions = /*[[${test.questions}]]*/ [];
+    const totalQuestions = questions.length;
+    let currentIndex = 0;
+    const testId = /*[[${test.id}]]*/ null;
+    const needCorrectAnswerCount = /*[[${test.needCorrectAnswerCount}]]*/ 0;
+    const submitUrl = /*[[@{/tests/submit}]]*/ '/tests/submit';
+
+    const userAnswers = {};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+
+        if (totalQuestions === 0) {
+            document.getElementById('questionContainer').innerHTML =
+                '<div class="empty-state"><span class="empty-icon">📭</span><p>Вопросы не найдены</p></div>';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('navIndicators').style.display = 'none';
+            return;
+        }
+
+        initIndicators();
+        showQuestion(currentIndex);
+        updateProgress();
+        updateNavigation();
+        updateIndicators();
+    });
+
+    function initIndicators() {
+        const container = document.getElementById('navIndicators');
+        container.innerHTML = '';
+        for (let i = 0; i < totalQuestions; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.dataset.index = i;
+            dot.title = 'Вопрос ' + (i + 1);
+            dot.onclick = function() { goToQuestion(i); };
+            container.appendChild(dot);
+        }
+    }
+
+    function showQuestion(index) {
+        const question = questions[index];
+        if (!question) return;
+
+        const container = document.getElementById('questionContainer');
+
+        const isMultiple = question.questionType === 'MULTI_ANSWERS';
+        const inputType = isMultiple ? 'checkbox' : 'radio';
+        const inputName = 'question_' + question.id;
+
+        let html = `
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">Вопрос ${index + 1} из ${totalQuestions}</span>
+                    <span class="question-type badge-hash">${isMultiple ? '🔄 Несколько ответов' : '⭕ Один ответ'}</span>
+                </div>
+                <h2 class="question-text">${question.text}</h2>
+                <div class="answers-list">
+        `;
+
+        question.answers.forEach(answer => {
+            const checked = isAnswerSelected(question.id, answer.id) ? 'checked' : '';
+            html += `
+                <label class="answer-item ${checked ? 'selected' : ''}">
+                    <input type="${inputType}"
+                           name="${inputName}"
+                           value="${answer.id}"
+                           ${checked}
+                           onchange="onAnswerChange(${question.id}, ${answer.id}, '${inputType}')">
+                    <span class="answer-text">${answer.text}</span>
+                </label>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+        updateProgress();
+
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+    }
+
+    function onAnswerChange(questionId, answerId, type) {
+        if (type === 'radio') {
+            userAnswers[questionId] = [answerId];
+        } else {
+            if (!userAnswers[questionId]) {
+                userAnswers[questionId] = [];
+            }
+            const index = userAnswers[questionId].indexOf(answerId);
+            if (index === -1) {
+                userAnswers[questionId].push(answerId);
+            } else {
+                userAnswers[questionId].splice(index, 1);
+                if (userAnswers[questionId].length === 0) {
+                    delete userAnswers[questionId];
+                }
+            }
+        }
+
+        updateProgress();
+        updateIndicators();
+        updateAnswerStyles(questionId);
+    }
+
+    function isAnswerSelected(questionId, answerId) {
+        return userAnswers[questionId] && userAnswers[questionId].includes(answerId);
+    }
+
+    function updateAnswerStyles(questionId) {
+        const labels = document.querySelectorAll('.answer-item');
+        labels.forEach(label => {
+            const input = label.querySelector('input');
+            if (input) {
+                const isChecked = isAnswerSelected(questionId, parseInt(input.value));
+                label.classList.toggle('selected', isChecked);
+                input.checked = isChecked;
+            }
+        });
+    }
+
+    function nextQuestion() {
+        if (currentIndex < totalQuestions - 1) {
+            currentIndex++;
+            showQuestion(currentIndex);
+            updateNavigation();
+            updateIndicators();
+            scrollToTop();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            showQuestion(currentIndex);
+            updateNavigation();
+            updateIndicators();
+            scrollToTop();
+        }
+    }
+
+    function goToQuestion(index) {
+        if (index >= 0 && index < totalQuestions && index !== currentIndex) {
+            currentIndex = index;
+            showQuestion(currentIndex);
+            updateNavigation();
+            updateIndicators();
+            scrollToTop();
+        }
+    }
+
+    function updateProgress() {
+        const answered = Object.keys(userAnswers).length;
+        document.getElementById('answeredCount').textContent = answered;
+
+        const percent = (answered / totalQuestions) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function updateNavigation() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        prevBtn.disabled = (currentIndex === 0);
+        prevBtn.style.opacity = (currentIndex === 0) ? '0.4' : '1';
+        prevBtn.style.cursor = (currentIndex === 0) ? 'not-allowed' : 'pointer';
+
+        if (currentIndex === totalQuestions - 1) {
+            nextBtn.textContent = '📤 Завершить';
+            nextBtn.className = 'btn-nav btn-finish';
+            nextBtn.onclick = submitTest;
+        } else {
+            nextBtn.textContent = 'Вперед →';
+            nextBtn.className = 'btn-nav btn-next';
+            nextBtn.onclick = nextQuestion;
+        }
+    }
+
+    function updateIndicators() {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+
+            const question = questions[i];
+            if (question && userAnswers[question.id]) {
+                dot.classList.add('answered');
+            } else {
+                dot.classList.remove('answered');
+            }
+        });
+    }
+
+    function submitTest() {
+        const answered = Object.keys(userAnswers).length;
+        const total = totalQuestions;
+
+        if (answered < total) {
+            const confirmSubmit = confirm(
+                `Вы ответили только на ${answered} из ${total} вопросов.\n\n` +
+                `Неотвеченные вопросы будут считаться неправильными.\n\n` +
+                `Вы уверены, что хотите завершить тест?`
+            );
+            if (!confirmSubmit) return;
+        } else {
+            const confirmSubmit = confirm(
+                `Вы ответили на все ${total} вопросов.\n\n` +
+                `Вы уверены, что хотите завершить тест?`
+            );
+            if (!confirmSubmit) return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Отправка...';
+
+        const result = {
+            testId: testId,
+            answers: userAnswers
+        };
+
+        console.log('Результат теста:', JSON.stringify(result, null, 2));
+
+        fetch(submitUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify(result)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка при отправке результатов: ' + response.status);
+            }
+            return response.text();
+        })
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке результатов. Попробуйте еще раз.');
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = '📤 Завершить тест';
+        });
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            if (currentIndex === totalQuestions - 1) {
+                submitTest();
+            } else {
+                nextQuestion();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevQuestion();
+        }
+    });
+</script>
+
+</body>
+</html>

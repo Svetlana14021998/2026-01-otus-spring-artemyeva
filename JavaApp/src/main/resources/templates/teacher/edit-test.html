@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Редактирование теста</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/teacher/edit-test.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')" class="active">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="edit-test-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>✏️ Редактирование теста</h1>
+            <p>Измените информацию о тесте</p>
+        </div>
+
+        <div class="course-info">
+            <span class="course-label">Курс:</span>
+            <span class="course-name" th:text="${courseDescription}"></span>
+        </div>
+
+        <form id="testForm" th:action="@{/teacher/tests/edit}" method="post" class="edit-test-form">
+
+            <input type="hidden" name="id" th:value="${test.id}">
+
+            <input type="hidden" name="courseId" th:value="${test.courseId}">
+
+            <div class="form-group" th:classappend="${errors != null && errors.containsKey('title')} ? 'has-error' : ''">
+                <label for="title">Название теста <span class="required">*</span></label>
+                <input type="text" id="title" name="title" class="form-control"
+                       th:classappend="${errors != null && errors.containsKey('title')} ? 'input-error' : ''"
+                       th:value="${test != null ? test.title : ''}"
+                       placeholder="Введите название теста...">
+                <div th:if="${errors != null && errors.containsKey('title')}" class="field-error">
+                    <span th:text="${errors['title'][0]}"></span>
+                </div>
+            </div>
+
+            <div class="form-group" th:classappend="${errors != null && (errors.containsKey('needCorrectAnswerCount'))} ? 'has-error' : ''">
+                <label for="needCorrectAnswerCount">Правильных ответов для прохождения <span class="required">*</span></label>
+                <input type="number" id="needCorrectAnswerCount" name="needCorrectAnswerCount" class="form-control"
+                       th:classappend="${errors != null && (errors.containsKey('needCorrectAnswerCount'))} ? 'input-error' : ''"
+                       th:value="${test != null ? test.needCorrectAnswerCount : ''}"
+                       placeholder="Например: 3" min="1">
+                <div th:if="${errors != null && errors.containsKey('needCorrectAnswerCount')}" class="field-error">
+                    <span th:text="${errors['needCorrectAnswerCount'][0]}"></span>
+                </div>
+                <span class="helper-text">Сколько правильных ответов нужно для успешного прохождения теста</span>
+            </div>
+
+            <div class="form-group" th:classappend="${errors != null && errors.containsKey('questions')} ? 'has-error' : ''">
+                <label>Вопросы</label>
+                <div th:if="${errors != null && errors.containsKey('questions')}" class="field-error" style="margin-bottom: 12px;">
+                    <span th:text="${errors['questions'][0]}"></span>
+                </div>
+                <div id="questionsContainer">
+                </div>
+                <button type="button" class="btn-add-question" onclick="addQuestion()">
+                    <span>➕</span> Добавить вопрос
+                </button>
+                <span class="helper-text">Каждый вопрос может иметь несколько вариантов ответа</span>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/teacher/tests}" class="btn-cancel">Отмена</a>
+                <button type="submit" class="btn-submit">Сохранить изменения</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:inline="javascript">
+    const questionTypes = /*[[${questionTypes}]]*/ [];
+    const errors = /*[[${errors}]]*/ null;
+    const test = /*[[${test}]]*/ null;
+
+    let questionCounter = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (test && test.questions && test.questions.length > 0) {
+            restoreQuestions(test.questions);
+        }
+    });
+
+    function getError(path) {
+        if (!errors) return null;
+        if (errors[path] && errors[path].length > 0) {
+            return errors[path][0];
+        }
+        return null;
+    }
+
+    function getQuestionErrors(questionIndex) {
+        if (!errors) return [];
+
+        const result = [];
+        const key = 'questions[' + questionIndex + ']';
+
+        if (errors[key] && errors[key].length > 0) {
+            result.push(...errors[key]);
+        }
+
+        return result;
+    }
+
+    function getAnswerError(questionIndex, answerIndex) {
+        if (!errors) return null;
+
+        const key = 'questions[' + questionIndex + '].answers[' + answerIndex + ']';
+        if (errors[key] && errors[key].length > 0) {
+            return errors[key][0];
+        }
+
+        return null;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function createAnswerHtml(questionIndex, answerIndex, answerData) {
+        const text = answerData ? escapeHtml(answerData.text || '') : '';
+        const isCorrect = answerData && answerData.isCorrect === true ? 'checked' : '';
+        const answerId = answerData && answerData.id ? answerData.id : '';
+        const answerError = getAnswerError(questionIndex, answerIndex);
+
+        const idInput = answerId ?
+            `<input type="hidden" name="questions[${questionIndex}].answers[${answerIndex}].id" value="${answerId}">` :
+            '';
+
+        const hiddenInput = `<input type="hidden" name="_questions[${questionIndex}].answers[${answerIndex}].isCorrect" value="on">`;
+
+        return `
+            <div class="answer-item" data-answer-index="${answerIndex}">
+                <div class="answer-row">
+                    <div class="answer-text-group">
+                        <label class="answer-label">Ответ ${answerIndex + 1}</label>
+                        ${idInput}
+                        <input type="text"
+                               name="questions[${questionIndex}].answers[${answerIndex}].text"
+                               class="form-control answer-input ${answerError ? 'input-error' : ''}"
+                               value="${text}"
+                               placeholder="Введите текст ответа...">
+                        ${answerError ? `<div class="field-error" style="margin-top: 4px;">${escapeHtml(answerError)}</div>` : ''}
+                    </div>
+                    <div class="answer-correct-group">
+                        <label class="answer-label">Правильный</label>
+                        ${hiddenInput}
+                        <input type="checkbox"
+                               name="questions[${questionIndex}].answers[${answerIndex}].isCorrect"
+                               class="answer-checkbox"
+                               value="true"
+                               ${isCorrect}>
+                    </div>
+                    <button type="button" class="btn-remove-answer" onclick="removeAnswer(this, ${questionIndex})" title="Удалить ответ">
+                        ✕
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createQuestionHtml(questionIndex, questionData) {
+        const questionId = questionIndex + 1;
+        const text = questionData ? escapeHtml(questionData.text || '') : '';
+        const questionType = questionData ? questionData.questionType : '';
+        const questionIdValue = questionData && questionData.id ? questionData.id : '';
+
+        const textError = getError('questions[' + questionIndex + '].text');
+        const typeError = getError('questions[' + questionIndex + '].questionType');
+        const questionErrors = getQuestionErrors(questionIndex);
+        const hasQuestionErrors = questionErrors.length > 0;
+
+        const idInput = questionIdValue ?
+            `<input type="hidden" name="questions[${questionIndex}].id" value="${questionIdValue}">` :
+            '';
+
+        let typeOptions = '<option value="">Выберите тип вопроса</option>';
+        if (questionTypes && questionTypes.length > 0) {
+            questionTypes.forEach(function(type) {
+                const selected = questionType == type ? 'selected' : '';
+                typeOptions += `<option value="${type}" ${selected}>${type}</option>`;
+            });
+        } else {
+            typeOptions += `
+                <option value="SINGLE_CHOICE">Один ответ</option>
+                <option value="MULTI_ANSWERS">Несколько ответов</option>
+            `;
+        }
+
+        let answersHtml = '';
+        const answers = questionData && questionData.answers ? questionData.answers : [];
+
+        if (answers.length > 0) {
+            answers.forEach(function(answer, answerIndex) {
+                answersHtml += createAnswerHtml(questionIndex, answerIndex, answer);
+            });
+        }
+
+        let questionErrorsHtml = '';
+        if (hasQuestionErrors) {
+            questionErrorsHtml = questionErrors.map(function(msg) {
+                return `<div class="field-error" style="margin-bottom: 8px;">${escapeHtml(msg)}</div>`;
+            }).join('');
+        }
+
+        return `
+            <div class="question-block" id="question-${questionId}">
+                <div class="question-header">
+                    <span class="question-number">Вопрос ${questionId}</span>
+                    <button type="button" class="btn-remove-question" onclick="removeQuestion(${questionId})" title="Удалить вопрос">
+                        🗑️
+                    </button>
+                </div>
+
+                ${hasQuestionErrors ? `<div class="question-errors" style="margin-bottom: 12px;">${questionErrorsHtml}</div>` : ''}
+
+                <div class="form-group ${textError ? 'has-error' : ''}">
+                    <label for="question-text-${questionId}">Текст вопроса <span class="required">*</span></label>
+                    ${idInput}
+                    <input type="text" id="question-text-${questionId}"
+                           name="questions[${questionIndex}].text"
+                           class="form-control ${textError ? 'input-error' : ''}"
+                           value="${text}"
+                           placeholder="Введите текст вопроса...">
+                    ${textError ? `<div class="field-error">${escapeHtml(textError)}</div>` : ''}
+                </div>
+
+                <div class="form-group ${typeError ? 'has-error' : ''}">
+                    <label for="question-type-${questionId}">Тип вопроса <span class="required">*</span></label>
+                    <select id="question-type-${questionId}"
+                            name="questions[${questionIndex}].questionType"
+                            class="form-control ${typeError ? 'input-error' : ''}">
+                        ${typeOptions}
+                    </select>
+                    ${typeError ? `<div class="field-error">${escapeHtml(typeError)}</div>` : ''}
+                </div>
+
+                <div class="form-group">
+                    <label>Варианты ответов</label>
+                    <div id="answers-container-${questionId}">
+                        ${answersHtml}
+                    </div>
+                    <button type="button" class="btn-add-answer" onclick="addAnswer(${questionId})">
+                        <span>➕</span> Добавить ответ
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function restoreQuestions(questions) {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        questions.forEach(function(question, index) {
+            const html = createQuestionHtml(index, question);
+            container.insertAdjacentHTML('beforeend', html);
+        });
+
+        questionCounter = questions.length;
+    }
+
+    function addQuestion() {
+        const container = document.getElementById('questionsContainer');
+        const questionIndex = questionCounter;
+
+        const html = createQuestionHtml(questionIndex, null);
+        container.insertAdjacentHTML('beforeend', html);
+
+        questionCounter++;
+    }
+
+    function removeQuestion(questionId) {
+        const element = document.getElementById('question-' + questionId);
+        if (element) {
+            element.remove();
+            questionCounter--;
+            if (questionCounter > 0) {
+                renumberQuestions();
+            }
+        }
+    }
+
+    function renumberQuestions() {
+        const blocks = document.querySelectorAll('.question-block');
+        blocks.forEach(function(block, index) {
+            const newId = 'question-' + (index + 1);
+            block.id = newId;
+
+            const number = block.querySelector('.question-number');
+            if (number) {
+                number.textContent = 'Вопрос ' + (index + 1);
+            }
+
+            const inputs = block.querySelectorAll('input, select');
+            inputs.forEach(function(input) {
+                if (input.name) {
+                    input.name = input.name.replace(/questions\[\d+\]/g, 'questions[' + index + ']');
+                }
+            });
+
+            const answersContainer = block.querySelector('[id^="answers-container-"]');
+            if (answersContainer) {
+                answersContainer.id = 'answers-container-' + (index + 1);
+            }
+
+            const removeAnswerButtons = block.querySelectorAll('.btn-remove-answer');
+            removeAnswerButtons.forEach(function(button) {
+                button.setAttribute('onclick', 'removeAnswer(this, ' + index + ')');
+            });
+
+            const addAnswerButton = block.querySelector('.btn-add-answer');
+            if (addAnswerButton) {
+                addAnswerButton.setAttribute('onclick', 'addAnswer(' + (index + 1) + ')');
+            }
+
+            const removeQuestionButton = block.querySelector('.btn-remove-question');
+            if (removeQuestionButton) {
+                removeQuestionButton.setAttribute('onclick', 'removeQuestion(' + (index + 1) + ')');
+            }
+
+            const labels = block.querySelectorAll('label[for]');
+            labels.forEach(function(label) {
+                const forAttr = label.getAttribute('for');
+                if (forAttr && forAttr.includes('question-text-')) {
+                    label.setAttribute('for', 'question-text-' + (index + 1));
+                }
+                if (forAttr && forAttr.includes('question-type-')) {
+                    label.setAttribute('for', 'question-type-' + (index + 1));
+                }
+            });
+
+            const textInput = block.querySelector('[id^="question-text-"]');
+            if (textInput) {
+                textInput.id = 'question-text-' + (index + 1);
+            }
+
+            const typeSelect = block.querySelector('[id^="question-type-"]');
+            if (typeSelect) {
+                typeSelect.id = 'question-type-' + (index + 1);
+            }
+        });
+    }
+
+    function addAnswer(questionId) {
+        const container = document.getElementById('answers-container-' + questionId);
+        if (!container) return;
+
+        const questionIndex = questionId - 1;
+        const answerCount = container.children.length;
+
+        const html = createAnswerHtml(questionIndex, answerCount, null);
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeAnswer(button, questionIndex) {
+        const container = button.closest('[id^="answers-container-"]');
+        if (!container) return;
+
+        const answerDiv = button.closest('.answer-item');
+        if (answerDiv) {
+            answerDiv.remove();
+
+            const remainingAnswers = container.querySelectorAll('.answer-item');
+            remainingAnswers.forEach(function(item, index) {
+                const label = item.querySelector('.answer-label');
+                if (label) {
+                    label.textContent = 'Ответ ' + (index + 1);
+                }
+
+                const textInput = item.querySelector('.answer-input');
+                const checkbox = item.querySelector('.answer-checkbox');
+                const hiddenInput = item.querySelector('input[type="hidden"][name$=".isCorrect"]');
+                const idInput = item.querySelector('input[name$=".id"]');
+
+                if (textInput) {
+                    textInput.name = 'questions[' + questionIndex + '].answers[' + index + '].text';
+                }
+                if (checkbox) {
+                    checkbox.name = 'questions[' + questionIndex + '].answers[' + index + '].isCorrect';
+                }
+                if (hiddenInput) {
+                    hiddenInput.name = '_questions[' + questionIndex + '].answers[' + index + '].isCorrect';
+                }
+                if (idInput) {
+                    idInput.name = 'questions[' + questionIndex + '].answers[' + index + '].id';
+                }
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

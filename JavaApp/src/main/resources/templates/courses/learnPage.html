@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — Изучение курса: <span th:text="${course.courseType.description}">Java</span></title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/courses/learnPage.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')" class="active">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="learn-page">
+    <div class="container">
+        <div class="breadcrumbs">
+            <a th:href="@{/main}">Главная</a>
+            <span class="separator">›</span>
+            <a th:href="@{/courses}">Курсы</a>
+            <span class="separator">›</span>
+            <a th:href="@{/courses/{id}(id=${course.id})}" th:text="${course.courseType.description}">Курс</a>
+            <span class="separator">›</span>
+            <span class="current">Изучение</span>
+        </div>
+
+        <div class="course-info-bar">
+            <div class="course-info-left">
+                <span class="course-badge badge-hash" th:text="${course.courseType.description}">JAVA</span>
+                <span class="course-title-small" th:text="${course.courseType.description}">Принципы ООП</span>
+            </div>
+            <div class="course-info-right">
+                <span class="course-author">
+                    👨‍🏫 <span th:text="${course.teacher.fullName}">Иван Петров</span>
+                </span>
+                <span class="course-materials-count">
+                    📖 <span th:text="${course.materialsCount}">0</span> материалов
+                </span>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-info">
+                <span class="progress-label">📊 Прогресс изучения</span>
+                <span class="progress-text">
+                    <span id="currentPage">1</span> / <span id="totalPages" th:text="${course.materialsCount}">0</span>
+                </span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <div class="material-container">
+            <div class="material-content" id="materialContent">
+                <div class="material-body" id="materialBody">
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-section">
+            <button class="btn-nav btn-prev" id="prevBtn" onclick="prevMaterial()">
+                ← Назад
+            </button>
+
+            <div class="nav-indicators" id="navIndicators">
+            </div>
+
+            <button class="btn-nav btn-next" id="nextBtn" onclick="nextMaterial()">
+                Вперед →
+            </button>
+        </div>
+
+        <div class="completion-section" id="completionSection" style="display: none;">
+            <div class="completion-message">
+                <span class="completion-icon">🎉</span>
+                <h2>Поздравляем!</h2>
+                <p>Вы успешно изучили все материалы курса <strong th:text="${course.courseType.description}">Java</strong></p>
+            </div>
+            <div class="completion-actions">
+                <a th:href="@{/courses}" class="btn-complete">
+                    📚 К списку курсов
+                </a>
+                <a th:if="${course.testId != null}"
+                   th:href="@{/tests/{testId}(testId=${course.testId})}"
+                   class="btn-test">
+                    📝 Пройти тест
+                </a>
+                <div th:unless="${course.testId != null}" class="btn-test-disabled">
+                    📝 Тест не доступен
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/color-helper.js}"></script>
+<script th:inline="javascript">
+    const materials = /*[[${course.theoryMaterials}]]*/ [];
+    const testId = /*[[${course.testId}]]*/ null;
+    const totalMaterials = materials.length;
+    let currentIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initBadges === 'function') {
+            initBadges();
+        }
+
+        if (totalMaterials === 0) {
+            document.getElementById('materialBody').innerHTML =
+                '<div class="empty-materials"><span class="empty-icon">📭</span><p>Нет материалов для изучения</p></div>';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.querySelector('.progress-section').style.display = 'none';
+            document.querySelector('.nav-indicators').style.display = 'none';
+            return;
+        }
+
+        initIndicators();
+        updateMaterial(currentIndex);
+        updateProgress(currentIndex);
+        updateNavigation(currentIndex);
+        updateIndicators(currentIndex);
+    });
+
+    function initIndicators() {
+        const container = document.getElementById('navIndicators');
+        container.innerHTML = '';
+        for (let i = 0; i < totalMaterials; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.dataset.index = i;
+            dot.title = 'Материал ' + (i + 1);
+            dot.onclick = function() { goToMaterial(i); };
+            container.appendChild(dot);
+        }
+    }
+
+    function nextMaterial() {
+        if (currentIndex < totalMaterials - 1) {
+            currentIndex++;
+            updateMaterial(currentIndex);
+            updateProgress(currentIndex);
+            updateNavigation(currentIndex);
+            updateIndicators(currentIndex);
+            scrollToTop();
+        }
+    }
+
+    function prevMaterial() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateMaterial(currentIndex);
+            updateProgress(currentIndex);
+            updateNavigation(currentIndex);
+            updateIndicators(currentIndex);
+            scrollToTop();
+        }
+    }
+
+    function goToMaterial(index) {
+        if (index >= 0 && index < totalMaterials && index !== currentIndex) {
+            currentIndex = index;
+            updateMaterial(currentIndex);
+            updateProgress(currentIndex);
+            updateNavigation(currentIndex);
+            updateIndicators(currentIndex);
+            scrollToTop();
+        }
+    }
+
+    function updateMaterial(index) {
+        const material = materials[index];
+        if (material && material.content) {
+            document.getElementById('materialBody').innerHTML = material.content;
+        } else {
+            document.getElementById('materialBody').innerHTML =
+                '<p style="text-align: center; color: #7f8c8d; padding: 40px;">Материал не найден</p>';
+        }
+    }
+
+    function updateProgress(index) {
+        const current = index + 1;
+        const percent = (current / totalMaterials) * 100;
+
+        document.getElementById('currentPage').textContent = current;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function updateNavigation(index) {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        prevBtn.disabled = (index === 0);
+        prevBtn.style.opacity = (index === 0) ? '0.4' : '1';
+        prevBtn.style.cursor = (index === 0) ? 'not-allowed' : 'pointer';
+
+        if (index === totalMaterials - 1) {
+            nextBtn.textContent = '✅ Завершить';
+            nextBtn.className = 'btn-nav btn-finish';
+            nextBtn.onclick = showCompletion;
+        } else {
+            nextBtn.textContent = 'Вперед →';
+            nextBtn.className = 'btn-nav btn-next';
+            nextBtn.onclick = nextMaterial;
+        }
+    }
+
+    function updateIndicators(index) {
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+            dot.classList.toggle('completed', i < index);
+        });
+    }
+
+    function showCompletion() {
+        const materialContainer = document.querySelector('.material-container');
+        const navigationSection = document.querySelector('.navigation-section');
+        const completionSection = document.getElementById('completionSection');
+        const progressSection = document.querySelector('.progress-section');
+
+        materialContainer.style.display = 'none';
+        navigationSection.style.display = 'none';
+        progressSection.style.display = 'none';
+        completionSection.style.display = 'block';
+
+        document.getElementById('currentPage').textContent = totalMaterials;
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        const completionSection = document.getElementById('completionSection');
+        if (completionSection.style.display === 'block') return;
+        if (totalMaterials === 0) return;
+
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextMaterial();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevMaterial();
+        }
+    });
+</script>
+
+</body>
+</html>

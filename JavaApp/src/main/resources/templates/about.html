@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaLearn — О проекте</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/about.css}">
+    <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+</head>
+<body>
+
+
+<nav class="navbar">
+    <div class="container">
+        <a class="logo" th:href="@{/main}">
+            <span class="logo-icon">☕</span> JavaLearn
+        </a>
+
+        <ul class="nav-menu">
+            <li class="nav-links-group">
+                <a th:href="@{/main}" class="active">Главная</a>
+                <a th:href="@{/courses}" sec:authorize="hasRole('USER')">Материалы</a>
+                <a th:href="@{/tests}" sec:authorize="hasRole('USER')">Тесты</a>
+                <a th:href="@{/tests/results}" sec:authorize="hasRole('USER')">Мои результаты</a>
+                <a th:href="@{/teacher/courses}" sec:authorize="hasRole('TEACHER')">Мои материалы</a>
+                <a th:href="@{/teacher/tests}" sec:authorize="hasRole('TEACHER')">Мои тесты</a>
+                <a th:href="@{/admin/employees}" sec:authorize="hasRole('ADMIN')">Сотрудники</a>
+                <a th:href="@{/admin/statistics}" sec:authorize="hasRole('ADMIN')">Статистика</a>
+                <a th:href="@{/about}">О проекте</a>
+            </li>
+
+            <li class="nav-actions-group">
+                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="btn-login">Войти</a>
+                <a sec:authorize="!isAuthenticated()" th:href="@{/register}" class="btn-register">Регистрация</a>
+
+                <a sec:authorize="isAuthenticated()" th:href="@{/profile}" class="btn-profile">👤 Мой профиль</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/logout}" class="btn-logout">🚪 Выход</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<section class="about-hero">
+    <div class="container">
+        <div class="about-hero-content">
+            <h1>О проекте <span class="highlight">JavaLearn</span></h1>
+            <p>
+                Платформа для изучения Java, созданная с любовью к образованию
+                и стремлением сделать обучение доступным для каждого.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="mission">
+    <div class="container">
+        <div class="mission-grid">
+            <div class="mission-item">
+                <div class="mission-icon">🎯</div>
+                <h3>Наша миссия</h3>
+                <p>
+                    Сделать изучение Java простым, структурированным и увлекательным.
+                    Мы верим, что качественное образование должно быть доступно каждому.
+                </p>
+            </div>
+            <div class="mission-item">
+                <div class="mission-icon">💡</div>
+                <h3>Наш подход</h3>
+                <p>
+                    Теория, подкреплённая практикой. Мы создаём материалы,
+                    которые помогают не просто запомнить, а понять и применить знания.
+                </p>
+            </div>
+            <div class="mission-item">
+                <div class="mission-icon">🤝</div>
+                <h3>Наши ценности</h3>
+                <p>
+                    Доступность, качество и постоянное развитие.
+                    Мы открыты к обратной связи и всегда стремимся к совершенству.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="team">
+    <div class="container">
+        <div class="section-header">
+            <h2>Команда проекта</h2>
+            <p>Ключевые люди, которые создают JavaLearn</p>
+        </div>
+
+        <div class="team-grid">
+            <div class="team-item">
+                <div class="team-photo">
+                    <img th:src="@{/images/team/aleksey.jpg}" alt="Алексей Иванов">
+                </div>
+                <h5>Алексей Иванов</h5>
+                <span class="team-role">Руководитель проекта</span>
+                <p>Опыт в разработке более 10 лет. Преподаёт Java с 2018 года.</p>
+            </div>
+
+            <div class="team-item">
+                <div class="team-photo">
+                    <img th:src="@{/images/team/elena.jpg}" alt="Елена Смирнова">
+                </div>
+                <h5>Елена Смирнова</h5>
+                <span class="team-role">Методолог</span>
+                <p>Кандидат наук, автор курсов по Java и алгоритмам.</p>
+            </div>
+
+            <div class="team-item">
+                <div class="team-photo">
+                    <img th:src="@{/images/team/anna.jpg}" alt="Анна Козлова">
+                </div>
+                <h5>Анна Козлова</h5>
+                <span class="team-role">Разработчик платформы</span>
+                <p>Строит архитектуру приложения и отвечает за производительность.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="about-stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number" th:text="${courses}">150+</span>
+                <span class="stat-label">Материалов</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${tests}">45</span>
+                <span class="stat-label">Тестов</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${users}">1200+</span>
+                <span class="stat-label">Учеников</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" th:text="${teachers}">12</span>
+                <span class="stat-label">Учителей</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact-section" class="contact">
+    <div class="container">
+        <div class="contact-box">
+            <div class="contact-info">
+                <h2>Свяжитесь с нами</h2>
+                <p>
+                    Есть вопросы или предложения? Мы всегда рады обратной связи.
+                </p>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span th:text="${email}"></span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">💬</span>
+                        <span th:text="${telegram}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <div id="successMessage" th:if="${success}" class="alert alert-success">
+                    <span class="alert-icon">✅</span>
+                    <span th:text="${success}"></span>
+                </div>
+
+                <div id="errorMessage" th:if="${error}" class="alert alert-danger">
+                    <span class="alert-icon">❌</span>
+                    <span th:text="${error}"></span>
+                </div>
+
+                <form th:action="@{/about/send-question}" th:object="${question}" method="post" id="contactForm">
+                    <div class="form-group">
+                        <label for="name">Ваше имя</label>
+                        <input type="text" id="name" th:field="*{name}" placeholder="Введите имя">
+                        <span th:if="${errors != null && errors.containsKey('name')}" class="error-message" th:text="${errors['name']}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" th:field="*{email}" placeholder="Введите email">
+                        <span th:if="${errors != null && errors.containsKey('email')}" class="error-message" th:text="${errors['email']}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Сообщение</label>
+                        <textarea id="message" th:field="*{message}" rows="3" placeholder="Ваше сообщение"></textarea>
+                        <span th:if="${errors != null && errors.containsKey('message')}" class="error-message" th:text="${errors['message']}"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-brand">
+                    <span class="logo-icon">☕</span> JavaLearn
+                    <p>Изучай Java с удовольствием</p>
+                </div>
+            </div>
+
+            <div class="footer-contacts">
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📧</span>
+                    <span>Почта:</span>
+                    <span th:text="${email}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">📱</span>
+                    <span>Телефон:</span>
+                    <span th:text="${phone}"></span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">💬</span>
+                    <span>Телеграм:</span>
+                    <span th:text="${telegram}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-copy">
+                <span>©
+                    <span th:text="${#calendars.year(#calendars.createNow())}"></span>
+                </span>
+                Все права защищены.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const contactSection = document.getElementById('contact-section');
+
+        const errorMessages = document.querySelectorAll('.error-message');
+        const hasErrors = errorMessages.length > 0;
+
+        const errorFields = document.querySelectorAll('.form-group .error-message');
+        const hasValidationErrors = errorFields.length > 0;
+
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const hasAlerts = !!(successMessage || errorMessage);
+
+        if ((hasValidationErrors || hasErrors || hasAlerts) && contactSection) {
+            setTimeout(function() {
+                contactSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 350);
+        }
+
+        if (successMessage) {
+            setTimeout(function() {
+                successMessage.style.transition = 'opacity 0.5s ease';
+                successMessage.style.opacity = '0';
+                setTimeout(function() {
+                    successMessage.style.display = 'none';
+                }, 500);
+            }, 10000);
+        }
+
+        if (errorMessage) {
+            setTimeout(function() {
+                errorMessage.style.transition = 'opacity 0.5s ease';
+                errorMessage.style.opacity = '0';
+                setTimeout(function() {
+                    errorMessage.style.display = 'none';
+                }, 500);
+            }, 10000);
+        }
+
+        function addCloseButton(alertElement) {
+            if (!alertElement) return;
+
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '✕';
+            closeBtn.style.cssText = `
+                margin-left: auto;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 18px;
+                opacity: 0.6;
+                transition: opacity 0.2s;
+            `;
+            closeBtn.onmouseover = function() {
+                this.style.opacity = '1';
+            };
+            closeBtn.onmouseout = function() {
+                this.style.opacity = '0.6';
+            };
+            closeBtn.onclick = function() {
+                alertElement.style.transition = 'opacity 0.3s ease';
+                alertElement.style.opacity = '0';
+                setTimeout(function() {
+                    alertElement.style.display = 'none';
+                }, 300);
+            };
+            alertElement.appendChild(closeBtn);
+        }
+
+        addCloseButton(successMessage);
+        addCloseButton(errorMessage);
+
+    });
+</script>
+
+</body>
+</html>

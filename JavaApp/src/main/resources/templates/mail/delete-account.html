@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Аккаунт удалён</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f6f9fc; color: #2c3e50; line-height: 1.6; -webkit-font-smoothing: antialiased; margin: 0; padding: 0;">
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f6f9fc;">
+    <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e9ecef;">
+
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 36px 40px 28px; text-align: center;">
+            <span style="font-size: 40px; display: block; margin-bottom: 8px;">🗑️</span>
+            <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">Аккаунт удалён</h1>
+            <p style="color: rgba(255,255,255,0.85); font-size: 14px; margin: 4px 0 0;">Ваш профиль на платформе JavaLearn был удалён</p>
+        </div>
+
+        <div style="padding: 32px 40px 28px;">
+
+            <p style="font-size: 18px; color: #2c3e50; margin-bottom: 4px;">
+                Здравствуйте, <strong style="color: #1a252f;" th:text="${data.username}">Иван</strong>!
+            </p>
+            <p style="font-size: 15px; color: #7f8c8d; margin-bottom: 24px;">
+                Ваш аккаунт на платформе JavaLearn был <strong style="color: #dc2626;">окончательно удалён</strong>.
+                Все данные, связанные с вашим профилем, были <strong style="color: #dc2626;">безвозвратно стёрты</strong>.
+            </p>
+
+            <div style="background: #fef2f2; border-radius: 12px; padding: 24px 28px; margin-bottom: 24px; border-left: 4px solid #dc2626; text-align: center;">
+                <span style="font-size: 48px; display: block; margin-bottom: 12px;">❌</span>
+                <div style="font-size: 20px; font-weight: 700; color: #991b1b;">Аккаунт удалён</div>
+                <div style="font-size: 14px; color: #7f1d1d; margin-top: 6px;">Восстановление аккаунта <strong>невозможно</strong></div>
+            </div>
+
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+                <div style="font-size: 14px; font-weight: 600; color: #78350f; margin-bottom: 6px;">📌 Что было удалено:</div>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #92400e; line-height: 1.8;">
+                    <li>Личная информация (имя, email, телефон)</li>
+                    <li>История прохождения тестов</li>
+                    <li>Сохранённый прогресс</li>
+                    <li>Все связанные данные</li>
+                </ul>
+            </div>
+
+            <div style="background: #eff6ff; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; border-left: 4px solid #3498db;">
+                <div style="font-size: 14px; font-weight: 600; color: #1e3a8a; margin-bottom: 4px;">📝 Хотите вернуться?</div>
+                <p style="font-size: 14px; color: #1e40af; margin: 0;">
+                    Вы всегда можете создать новый аккаунт на платформе JavaLearn.
+                    Мы будем рады видеть вас снова!
+                </p>
+            </div>
+
+            <div style="margin: 24px 0 8px; text-align: center;">
+                <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                    <a th:href="${data.baseUrl} + '/register'" style="display: inline-block; background: #3498db; color: #ffffff; padding: 14px 40px; border-radius: 10px; font-size: 16px; font-weight: 600; text-decoration: none; min-width: 220px; text-align: center;">📝 Создать новый аккаунт</a>
+                    <a th:href="${data.baseUrl}" style="display: inline-block; background: #f8f9fa; color: #2c3e50; padding: 12px 36px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; border: 1px solid #e9ecef; min-width: 220px; text-align: center;">📚 Перейти на главную</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px 40px 24px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="font-size: 13px; color: #95a5a6; margin: 4px 0;">
+                Если у вас возникли вопросы, свяжитесь с нами по почте
+                <a th:href="'mailto:' + ${data.supportEmail}" th:text="${data.supportEmail}" style="color: #3498db; text-decoration: none;">support@javalearn.ru</a>
+            </p>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top: 8px;">Это письмо было отправлено автоматически. Не отвечайте на него.</p>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top: 8px;">
+                &copy; <span th:text="${#calendars.year(#calendars.createNow())}"></span> JavaLearn. Все права защищены.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
