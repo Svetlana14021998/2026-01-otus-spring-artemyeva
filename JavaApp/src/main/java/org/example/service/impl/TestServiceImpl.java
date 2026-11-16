@@ -2,11 +2,11 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.converter.Test2TestShortViewConverter;
-import org.example.converter.Test2TestViewConverter;
-import org.example.converter.Test2TestWithOnlyTitleViewConverter;
-import org.example.converter.TestCreateView2TestConverter;
-import org.example.converter.TestView2TestConverter;
+import org.example.converter.Test2TestShortDtoConverter;
+import org.example.converter.Test2TestDtoConverter;
+import org.example.converter.Test2TestWithOnlyTitleDtoConverter;
+import org.example.converter.TestCreateDto2TestConverter;
+import org.example.converter.TestDto2TestConverter;
 import org.example.enums.CourseType;
 import org.example.exception.EntityLinksException;
 import org.example.exception.EntityNotFoundException;
@@ -19,12 +19,12 @@ import org.example.repository.specification.TestSpecification;
 import org.example.service.CourseService;
 import org.example.service.TestResultService;
 import org.example.service.TestService;
-import org.example.view.test.TestResultView;
-import org.example.view.test.TestSubmitView;
-import org.example.view.test.create.TestCreateView;
-import org.example.view.test.main.TestView;
-import org.example.view.test.show.TestShortView;
-import org.example.view.test.show.TestWithOnlyTitleView;
+import org.example.dto.test.TestResultDto;
+import org.example.dto.test.TestSubmitDto;
+import org.example.dto.test.create.TestCreateDto;
+import org.example.dto.test.main.TestDto;
+import org.example.dto.test.show.TestShortDto;
+import org.example.dto.test.show.TestWithOnlyTitleDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,55 +45,55 @@ public class TestServiceImpl implements TestService {
 
     private final TestRepository testRepository;
 
-    private final Test2TestShortViewConverter test2TestShortViewConverter;
+    private final Test2TestShortDtoConverter test2TestShortDtoConverter;
 
-    private final Test2TestViewConverter test2TestViewConverter;
+    private final Test2TestDtoConverter test2TestDtoConverter;
 
-    private final TestView2TestConverter testView2TestConverter;
+    private final TestDto2TestConverter testDto2TestConverter;
 
     private final TestResultService testResultService;
 
-    private final Test2TestWithOnlyTitleViewConverter test2TestWithOnlyTitleViewConverter;
+    private final Test2TestWithOnlyTitleDtoConverter test2TestWithOnlyTitleDtoConverter;
 
-    private final TestCreateView2TestConverter testCreateView2TestConverter;
+    private final TestCreateDto2TestConverter testCreateDto2TestConverter;
 
     private final CourseService courseService;
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TestShortView> findAll(CourseType courseType, String title, Long authorId, int pageSize, int pageNumber) {
+    public Page<TestShortDto> findAll(CourseType courseType, String title, Long authorId, int pageSize, int pageNumber) {
         log.info("Поиск всех тестов");
         Specification<Test> spec = buildSpecification(courseType, title, authorId);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        return testRepository.findAll(spec, pageable).map(test2TestShortViewConverter::convert);
+        return testRepository.findAll(spec, pageable).map(test2TestShortDtoConverter::convert);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TestWithOnlyTitleView> findAll() {
+    public List<TestWithOnlyTitleDto> findAll() {
         log.info("Поиск всех тестов (краткая информация)");
         return testRepository.findAll().stream()
-            .map(test2TestWithOnlyTitleViewConverter::convert)
+            .map(test2TestWithOnlyTitleDtoConverter::convert)
             .toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public TestView findById(Long id) {
+    public TestDto findById(Long id) {
         log.info("Поиск теста id {}", id);
-        return test2TestViewConverter.convert(testRepository.findById(id)
+        return test2TestDtoConverter.convert(testRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Тест %d не найден".formatted(id))));
     }
 
     @Transactional
     @Override
-    public TestResultView processTestResult(TestSubmitView testSubmitView, Long userId) {
-        log.info("Получены результаты теста id {} для пользователя {}", testSubmitView.getTestId(), userId);
-        Long testId = testSubmitView.getTestId();
-        Test test = testRepository.findById(testSubmitView.getTestId())
+    public TestResultDto processTestResult(TestSubmitDto testSubmitDto, Long userId) {
+        log.info("Получены результаты теста id {} для пользователя {}", testSubmitDto.getTestId(), userId);
+        Long testId = testSubmitDto.getTestId();
+        Test test = testRepository.findById(testSubmitDto.getTestId())
             .orElseThrow(() -> new EntityNotFoundException("Тест %d не найден".formatted(testId)));
-        int rightAnswerCount = getRightAnswerCount(testSubmitView, test);
+        int rightAnswerCount = getRightAnswerCount(testSubmitDto, test);
         int questionSize = test.getQuestions().size();
         BigDecimal percent = BigDecimal.valueOf((double) rightAnswerCount * 100 / questionSize)
             .setScale(2, RoundingMode.HALF_UP);
@@ -142,9 +142,9 @@ public class TestServiceImpl implements TestService {
 
     @Transactional
     @Override
-    public void createTest(TestCreateView testCreateView, Long authorId) {
+    public void createTest(TestCreateDto testCreateDto, Long authorId) {
         log.info("Создание теста");
-        Course course = courseService.findEntityById(testCreateView.getCourseId());
+        Course course = courseService.findEntityById(testCreateDto.getCourseId());
         if (course.getTest() != null) {
             throw new EntityLinksException("У курса уже есть тест", "К данному курсу уже добавлен тест");
         }
@@ -152,7 +152,7 @@ public class TestServiceImpl implements TestService {
             throw new PermissionException("Тест может быть создан только преподавателем, который создал курс",
                 "Вы не можете создать тест к курсу, который создал другой преподаватель");
         }
-        Test test = testCreateView2TestConverter.convert(testCreateView);
+        Test test = testCreateDto2TestConverter.convert(testCreateDto);
         course.setTest(test);
         test.setCourse(course);
 
@@ -162,23 +162,23 @@ public class TestServiceImpl implements TestService {
 
     @Transactional
     @Override
-    public void updateTest(TestView testView, Long authorId) {
-        log.info("Изменение теста {}", testView.getId());
-        Test test = testRepository.findById(testView.getId())
-            .orElseThrow(() -> new EntityNotFoundException("Тест %s не найден".formatted(testView.getId())));
+    public void updateTest(TestDto testDto, Long authorId) {
+        log.info("Изменение теста {}", testDto.getId());
+        Test test = testRepository.findById(testDto.getId())
+            .orElseThrow(() -> new EntityNotFoundException("Тест %s не найден".formatted(testDto.getId())));
         Course course = test.getCourse();
         if (!Objects.equals(course.getAuthor().getId(), authorId)) {
             throw new PermissionException("Тест может быть изменен только преподавателем, который его создал",
                 "Вы не можете изменить Тест, созданный другим преподавателем");
         }
-        test = testView2TestConverter.convert(test, testView);
+        test = testDto2TestConverter.convert(test, testDto);
         testRepository.save(test);
-        log.info("Тест {} был изменен", testView.getId());
+        log.info("Тест {} был изменен", testDto.getId());
     }
 
-    private int getRightAnswerCount(TestSubmitView testSubmitView, Test test) {
+    private int getRightAnswerCount(TestSubmitDto testSubmitDto, Test test) {
         Map<Long, List<Long>> correctAnswersMap = test.getCorrectAnswersMap();
-        Map<Long, List<Long>> userAnswers = testSubmitView.getAnswers();
+        Map<Long, List<Long>> userAnswers = testSubmitDto.getAnswers();
 
         int rightAnswerCount = 0;
         for (Long key : correctAnswersMap.keySet()) {

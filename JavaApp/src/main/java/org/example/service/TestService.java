@@ -1,32 +1,32 @@
 package org.example.service;
 
 import org.example.enums.CourseType;
-import org.example.view.test.TestResultView;
-import org.example.view.test.TestSubmitView;
-import org.example.view.test.create.TestCreateView;
-import org.example.view.test.main.TestView;
-import org.example.view.test.show.TestShortView;
-import org.example.view.test.show.TestWithOnlyTitleView;
+import org.example.dto.test.TestResultDto;
+import org.example.dto.test.TestSubmitDto;
+import org.example.dto.test.create.TestCreateDto;
+import org.example.dto.test.main.TestDto;
+import org.example.dto.test.show.TestShortDto;
+import org.example.dto.test.show.TestWithOnlyTitleDto;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TestService {
 
-    Page<TestShortView> findAll(CourseType courseType, String title, Long authorId, int pageSize, int pageNumber);
+    Page<TestShortDto> findAll(CourseType courseType, String title, Long authorId, int pageSize, int pageNumber);
 
-    List<TestWithOnlyTitleView> findAll();
+    List<TestWithOnlyTitleDto> findAll();
 
-    TestView findById(Long id);
+    TestDto findById(Long id);
 
-    TestResultView processTestResult(TestSubmitView testSubmitView, Long userId);
+    TestResultDto processTestResult(TestSubmitDto testSubmitDto, Long userId);
 
     long testsCount();
 
     void deleteById(Long id, Long authorId);
 
-    void createTest(TestCreateView testCreateView, Long id);
+    void createTest(TestCreateDto testCreateDto, Long id);
 
-    void updateTest(TestView testView, Long authorId);
+    void updateTest(TestDto testDto, Long authorId);
 }
 

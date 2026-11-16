@@ -7,6 +7,6 @@ public class CantSaveFileException extends RuntimeException {
     }
 
     public CantSaveFileException() {
-        super("Can`t save file");
+        super("Не удалось сохранить файл");
     }
 }

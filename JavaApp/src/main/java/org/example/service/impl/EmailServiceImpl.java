@@ -5,7 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.config.AppConfig;
-import org.example.dto.EmailRequest;
+import org.example.dto.EmailRequestDto;
 import org.example.exception.SendMessagingException;
 import org.example.service.EmailService;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final AppConfig config;
 
-    public void sendEmail(EmailRequest emailRequest) {
+    public void sendEmail(EmailRequestDto emailRequestDto) {
         try {
             log.info("Отправка email сообщения");
             MimeMessage message = mailSender.createMimeMessage();
@@ -34,9 +34,9 @@ public class EmailServiceImpl implements EmailService {
             //todo заглушка. письма должны отправляться на переданный email
             // helper.setTo(emailRequest.getTo());
             helper.setTo(config.getAdminEmail());
-            helper.setSubject(emailRequest.getSubject());
+            helper.setSubject(emailRequestDto.getSubject());
             helper.setFrom(config.getAutoSendEmail());
-            helper.setText(buildEmailContent(emailRequest), true);
+            helper.setText(buildEmailContent(emailRequestDto), true);
 
             mailSender.send(message);
             log.info("email сообщение успешно отправлено");
@@ -45,7 +45,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private String buildEmailContent(EmailRequest request) {
+    private String buildEmailContent(EmailRequestDto request) {
         Context context = new Context();
         context.setVariable("data", request.getData());
 

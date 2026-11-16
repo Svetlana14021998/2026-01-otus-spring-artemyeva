@@ -1,20 +1,20 @@
 package org.example.helper;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 
-@UtilityClass
+@Component
 public class PasswordGenerator {
 
     private static final String DIGITS = "0123456789";
     private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final String SPECIALS = "!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?";
     private static final String ALL = DIGITS + LETTERS + SPECIALS;
-    private final int PASSWORD_LENGTH = 5;
+    private static final int PASSWORD_LENGTH = 5;
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    public static String generate() {
+    public String generate() {
         StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
 
         for (int i = 0; i < PASSWORD_LENGTH; i++) {

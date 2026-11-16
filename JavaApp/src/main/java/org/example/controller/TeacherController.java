@@ -2,20 +2,21 @@ package org.example.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.course.CourseCreateDto;
+import org.example.dto.course.CourseDto;
+import org.example.dto.course.CourseShortDto;
+import org.example.dto.course.CourseUpdateDto;
+import org.example.dto.course.CourseWithMaterialsDto;
+import org.example.dto.test.create.TestCreateDto;
+import org.example.dto.test.main.TestDto;
+import org.example.dto.test.show.TestShortDto;
 import org.example.enums.CourseType;
 import org.example.enums.QuestionType;
 import org.example.model.AppUser;
 import org.example.service.CourseService;
 import org.example.service.TestService;
 import org.example.validator.TestValidator;
-import org.example.view.course.CourseCreateView;
-import org.example.view.course.CourseShortView;
-import org.example.view.course.CourseUpdateView;
-import org.example.view.course.CourseView;
-import org.example.view.course.CourseWithMaterialsView;
-import org.example.view.test.create.TestCreateView;
-import org.example.view.test.main.TestView;
-import org.example.view.test.show.TestShortView;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -33,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.context.i18n.LocaleContextHolder.getLocale;
+
 @Controller
 @RequiredArgsConstructor
 public class TeacherController {
@@ -43,6 +46,8 @@ public class TeacherController {
 
     private final TestValidator validator;
 
+    private final MessageSource messageSource;
+
     @GetMapping("/teacher/courses")
     public String getMyCoursePage(@RequestParam(required = false) String description,
         @RequestParam(required = false) CourseType courseType,
@@ -51,7 +56,7 @@ public class TeacherController {
         Authentication authentication,
         Model model) {
         AppUser user = (AppUser) authentication.getPrincipal();
-        Page<CourseView> courses = courseService.findAll(user.getId(), description, courseType, pageNumber, pageSize);
+        Page<CourseDto> courses = courseService.findAll(user.getId(), description, courseType, pageNumber, pageSize);
         model.addAttribute("courses", courses);
         model.addAttribute("courseType", CourseType.values());
         return "teacher/my-courses";
@@ -63,7 +68,8 @@ public class TeacherController {
         RedirectAttributes redirectAttributes) {
         AppUser user = (AppUser) authentication.getPrincipal();
         courseService.deleteById(id, user.getId());
-        redirectAttributes.addFlashAttribute("successMessage", "Курс удален");
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("course.deleted.success", null, getLocale()));
         return "redirect:/teacher/courses";
     }
 
@@ -75,13 +81,13 @@ public class TeacherController {
 
     @GetMapping("/teacher/courses/view/{id}")
     public String getCourseViewPage(@PathVariable Long id, Model model) {
-        CourseWithMaterialsView course = courseService.findByIdWithMaterials(id);
+        CourseWithMaterialsDto course = courseService.findByIdWithMaterials(id);
         model.addAttribute("course", course);
         return "teacher/view-course";
     }
 
     @PostMapping("/teacher/courses/create")
-    public String createCourse(@Valid @ModelAttribute CourseCreateView courseCreateView,
+    public String createCourse(@Valid @ModelAttribute CourseCreateDto courseCreateDto,
         BindingResult bindingResult,
         Authentication authentication,
         RedirectAttributes redirectAttributes,
@@ -92,26 +98,27 @@ public class TeacherController {
                 errors.put(error.getField(), error.getDefaultMessage());
             }
             model.addAttribute("courseTypes", CourseType.values());
-            model.addAttribute("courseCreateView", courseCreateView);
+            model.addAttribute("courseCreateView", courseCreateDto);
             model.addAttribute("errors", errors);
             return "teacher/create-course";
         }
         AppUser user = (AppUser) authentication.getPrincipal();
-        courseService.save(courseCreateView, user);
-        redirectAttributes.addFlashAttribute("successMessage", "Курс создан");
+        courseService.save(courseCreateDto, user);
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("course.created.success", null, getLocale()));
         return "redirect:/teacher/courses";
     }
 
     @GetMapping("/teacher/courses/edit/{id}")
     public String getCourseEditPage(@PathVariable Long id, Model model) {
-        CourseUpdateView course = courseService.findByIdToEdit(id);
+        CourseUpdateDto course = courseService.findByIdToEdit(id);
         model.addAttribute("courseTypes", CourseType.values());
         model.addAttribute("course", course);
         return "teacher/edit-course";
     }
 
     @PostMapping("/teacher/courses/edit")
-    public String editCourse(@Valid @ModelAttribute CourseUpdateView courseUpdateView,
+    public String editCourse(@Valid @ModelAttribute CourseUpdateDto courseUpdateDto,
         BindingResult bindingResult,
         Authentication authentication,
         RedirectAttributes redirectAttributes,
@@ -123,14 +130,15 @@ public class TeacherController {
                 errors.put(error.getField(), error.getDefaultMessage());
             }
             model.addAttribute("courseTypes", CourseType.values());
-            model.addAttribute("course", courseUpdateView);
+            model.addAttribute("course", courseUpdateDto);
             model.addAttribute("errors", errors);
             return "teacher/edit-course";
         }
 
         AppUser user = (AppUser) authentication.getPrincipal();
-        courseService.update(courseUpdateView, user.getId());
-        redirectAttributes.addFlashAttribute("successMessage", "Курс изменен");
+        courseService.update(courseUpdateDto, user.getId());
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("course.updated.success", null, getLocale()));
         return "redirect:/teacher/courses";
     }
 
@@ -142,7 +150,7 @@ public class TeacherController {
         Authentication authentication,
         Model model) {
         AppUser user = (AppUser) authentication.getPrincipal();
-        Page<TestShortView> tests = testService.findAll(courseType, title, user.getId(), pageSize, pageNumber);
+        Page<TestShortDto> tests = testService.findAll(courseType, title, user.getId(), pageSize, pageNumber);
         model.addAttribute("tests", tests);
         model.addAttribute("courseType", CourseType.values());
         return "teacher/my-tests";
@@ -152,7 +160,7 @@ public class TeacherController {
     public String getMyTestPage(@PathVariable Long id,
         Model model) {
 
-        TestView test = testService.findById(id);
+        TestDto test = testService.findById(id);
         model.addAttribute("test", test);
 
         return "teacher/view-test";
@@ -165,7 +173,8 @@ public class TeacherController {
         RedirectAttributes redirectAttributes) {
         AppUser user = (AppUser) authentication.getPrincipal();
         testService.deleteById(id, user.getId());
-        redirectAttributes.addFlashAttribute("successMessage", "Тест удален");
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("test.deleted.success", null, getLocale()));
         return "redirect:" + redirectUrl;
     }
 
@@ -175,7 +184,7 @@ public class TeacherController {
         Model model) {
         model.addAttribute("questionTypes", QuestionType.values());
 
-        List<CourseShortView> courses;
+        List<CourseShortDto> courses;
         if (courseId != null) {
             courses = List.of(courseService.findByIdForTest(courseId));
         } else {
@@ -187,29 +196,29 @@ public class TeacherController {
         model.addAttribute("selectedCourseId", courseId);
 
         if (!model.containsAttribute("testCreateView")) {
-            model.addAttribute("testCreateView", new TestCreateView());
+            model.addAttribute("testCreateView", new TestCreateDto());
         }
 
         return "teacher/create-test";
     }
 
     @PostMapping("/teacher/tests/create")
-    public String createTest(@ModelAttribute TestCreateView testCreateView,
+    public String createTest(@ModelAttribute TestCreateDto testCreateDto,
         Authentication authentication,
         RedirectAttributes redirectAttributes,
         Model model) {
 
-        Map<String, List<String>> validationResults = validator.validate(testCreateView);
+        Map<String, List<String>> validationResults = validator.validate(testCreateDto);
         if (!validationResults.isEmpty()) {
             model.addAttribute("errors", validationResults);
-            model.addAttribute("testCreateView", testCreateView);
+            model.addAttribute("testCreateView", testCreateDto);
             model.addAttribute("questionTypes", QuestionType.values());
-            model.addAttribute("selectedCourseId", testCreateView.getCourseId());
+            model.addAttribute("selectedCourseId", testCreateDto.getCourseId());
 
             AppUser user = (AppUser) authentication.getPrincipal();
-            List<CourseShortView> courses;
-            if (testCreateView.getCourseId() != null) {
-                courses = List.of(courseService.findByIdForTest(testCreateView.getCourseId()));
+            List<CourseShortDto> courses;
+            if (testCreateDto.getCourseId() != null) {
+                courses = List.of(courseService.findByIdForTest(testCreateDto.getCourseId()));
             } else {
                 courses = courseService.findCourseWithoutTestForTeacher(user.getId());
             }
@@ -219,45 +228,47 @@ public class TeacherController {
         }
 
         AppUser user = (AppUser) authentication.getPrincipal();
-        testService.createTest(testCreateView, user.getId());
+        testService.createTest(testCreateDto, user.getId());
 
-        redirectAttributes.addFlashAttribute("successMessage", "Тест успешно создан");
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("test.created.success", null, getLocale()));
         return "redirect:/teacher/tests";
     }
 
     @GetMapping("/teacher/tests/edit/{id}")
     public String getEditTestPage(@PathVariable Long id,
         Model model) {
-        TestView testView = testService.findById(id);
+        TestDto testDto = testService.findById(id);
         model.addAttribute("questionTypes", QuestionType.values());
-        model.addAttribute("test", testView);
+        model.addAttribute("test", testDto);
         model.addAttribute("courseDescription",
-            courseService.getCourseDescription(testView.getCourseId()));
+            courseService.getCourseDescription(testDto.getCourseId()));
         return "teacher/edit-test";
     }
 
     @PostMapping("/teacher/tests/edit")
-    public String editTest(@ModelAttribute TestView testView,
+    public String editTest(@ModelAttribute TestDto testDto,
         Authentication authentication,
         RedirectAttributes redirectAttributes,
         Model model) {
 
-        Map<String, List<String>> validationResults = validator.validate(testView);
+        Map<String, List<String>> validationResults = validator.validate(testDto);
         if (!validationResults.isEmpty()) {
 
             model.addAttribute("errors", validationResults);
-            model.addAttribute("test", testView);
+            model.addAttribute("test", testDto);
             model.addAttribute("questionTypes", QuestionType.values());
             model.addAttribute("courseDescription",
-                courseService.getCourseDescription(testView.getCourseId()));
+                courseService.getCourseDescription(testDto.getCourseId()));
 
             return "teacher/edit-test";
         }
 
         AppUser user = (AppUser) authentication.getPrincipal();
-        testService.updateTest(testView, user.getId());
+        testService.updateTest(testDto, user.getId());
 
-        redirectAttributes.addFlashAttribute("successMessage", "Тест успешно обновлен");
+        redirectAttributes.addFlashAttribute("successMessage",
+            messageSource.getMessage("test.updated.success", null, getLocale()));
         return "redirect:/teacher/tests";
     }
 }

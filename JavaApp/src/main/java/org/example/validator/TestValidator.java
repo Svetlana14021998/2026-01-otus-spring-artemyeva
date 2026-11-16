@@ -1,10 +1,10 @@
 package org.example.validator;
 
 import org.example.enums.QuestionType;
-import org.example.view.test.base.AbstractAnswerView;
-import org.example.view.test.base.AbstractQuestionView;
-import org.example.view.test.base.AbstractTestView;
-import org.example.view.test.create.TestCreateView;
+import org.example.dto.test.base.AbstractAnswerDto;
+import org.example.dto.test.base.AbstractQuestionDto;
+import org.example.dto.test.base.AbstractTestDto;
+import org.example.dto.test.create.TestCreateDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,28 +15,28 @@ import java.util.Map;
 @Component
 public class TestValidator {
 
-    public <A extends AbstractAnswerView, Q extends AbstractQuestionView<A>, T extends AbstractTestView<Q>> Map<String, List<String>> validate(T testView) {
+    public <A extends AbstractAnswerDto, Q extends AbstractQuestionDto<A>, T extends AbstractTestDto<Q>> Map<String, List<String>> validate(T testDto) {
         Map<String, List<String>> results = new HashMap<>();
-        validateTest(testView, results);
+        validateTest(testDto, results);
 
-        if (testView instanceof TestCreateView) {
-            validateSelectCourse((TestCreateView) testView, results);
+        if (testDto instanceof TestCreateDto) {
+            validateSelectCourse((TestCreateDto) testDto, results);
         }
 
-        if (testView.getQuestions() == null || testView.getQuestions().isEmpty()) {
+        if (testDto.getQuestions() == null || testDto.getQuestions().isEmpty()) {
             results.put("questions", List.of("Нужно добавить хотя бы 1 вопрос"));
         } else {
-            validateQuestions(testView.getQuestions(), results);
+            validateQuestions(testDto.getQuestions(), results);
         }
         return results;
     }
 
-    private <A extends AbstractAnswerView> void validateQuestions(List<? extends AbstractQuestionView<A>> questions,
+    private <A extends AbstractAnswerDto> void validateQuestions(List<? extends AbstractQuestionDto<A>> questions,
         Map<String, List<String>> results) {
         for (int i = 0; i < questions.size(); i++) {
             List<String> error = new ArrayList<>();
             String key = "questions[%d]".formatted(i);
-            AbstractQuestionView<A> question = questions.get(i);
+            AbstractQuestionDto<A> question = questions.get(i);
 
             if (question.getQuestionType() == null) {
                 error.add("Необходимо выбрать тип вопроса");
@@ -66,7 +66,7 @@ public class TestValidator {
         }
     }
 
-    private <A extends AbstractAnswerView>
+    private <A extends AbstractAnswerDto>
     void validateAnswers(List<A> answers, String questionKey, Map<String, List<String>> results) {
         for (int i = 0; i < answers.size(); i++) {
             A answer = answers.get(i);
@@ -84,7 +84,7 @@ public class TestValidator {
         }
     }
 
-    private <A extends AbstractAnswerView> boolean existsMoreThanOneCorrectAnswerForOneAnswerQuestion(List<A> answers, QuestionType questionType) {
+    private <A extends AbstractAnswerDto> boolean existsMoreThanOneCorrectAnswerForOneAnswerQuestion(List<A> answers, QuestionType questionType) {
         if (answers == null || answers.isEmpty()) {
             return false;
         }
@@ -96,35 +96,35 @@ public class TestValidator {
         return false;
     }
 
-    private <A extends AbstractAnswerView> boolean existsOneCorrectAnswer(List<A> answers) {
+    private <A extends AbstractAnswerDto> boolean existsOneCorrectAnswer(List<A> answers) {
         if (answers == null || answers.isEmpty()) {
             return false;
         }
         return answers.stream()
             .filter(a -> a.getIsCorrect() != null)
-            .anyMatch(AbstractAnswerView::getIsCorrect);
+            .anyMatch(AbstractAnswerDto::getIsCorrect);
     }
 
-    private <T extends AbstractTestView<?>> void validateTest(T testView, Map<String, List<String>> results) {
-        String title = testView.getTitle();
+    private <T extends AbstractTestDto<?>> void validateTest(T testDto, Map<String, List<String>> results) {
+        String title = testDto.getTitle();
         if (title == null || title.isBlank()) {
             results.put("title", List.of("Название теста не может быть пустым"));
         }
 
-        Integer needCorrectAnswerCount = testView.getNeedCorrectAnswerCount();
+        Integer needCorrectAnswerCount = testDto.getNeedCorrectAnswerCount();
         if (needCorrectAnswerCount == null || needCorrectAnswerCount <= 0) {
             results.put("needCorrectAnswerCount",
                 List.of("Необходимо указать количество правильных ответов для прохождения теста"));
-        } else if (testView.getQuestions() != null && !testView.getQuestions().isEmpty()) {
-            if (testView.getQuestions().size() < needCorrectAnswerCount) {
+        } else if (testDto.getQuestions() != null && !testDto.getQuestions().isEmpty()) {
+            if (testDto.getQuestions().size() < needCorrectAnswerCount) {
                 results.put("needCorrectAnswerCount",
                     List.of("Количество правильных ответов для прохождения теста не может быть больше количества вопросов"));
             }
         }
     }
 
-    private void validateSelectCourse(TestCreateView testCreateView, Map<String, List<String>> results) {
-        if (testCreateView.getCourseId() == null) {
+    private void validateSelectCourse(TestCreateDto testCreateDto, Map<String, List<String>> results) {
+        if (testCreateDto.getCourseId() == null) {
             results.put("courseId", List.of("Нужно выбрать курс, к которому относится данный тест"));
         }
     }

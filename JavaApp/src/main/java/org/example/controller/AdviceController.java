@@ -7,6 +7,8 @@ import org.example.config.AppConfig;
 import org.example.exception.EntityLinksException;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.PermissionException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +25,8 @@ public class AdviceController {
 
     private final AppConfig appConfig;
 
+    private final MessageSource messageSource;
+
     @ModelAttribute
     public void addGlobalAttributes(Model model) {
         model.addAttribute("email", appConfig.getEmail());
@@ -36,7 +40,8 @@ public class AdviceController {
         RedirectAttributes redirectAttributes) {
         log.error("Сущность не найдена: {}", e.getMessage());
 
-        redirectAttributes.addFlashAttribute("globalError", "Запрашиваемая запись не найдена");
+        redirectAttributes.addFlashAttribute("globalError",
+            messageSource.getMessage("request.record.not.found", null, LocaleContextHolder.getLocale()));
         return redirect(request);
     }
 

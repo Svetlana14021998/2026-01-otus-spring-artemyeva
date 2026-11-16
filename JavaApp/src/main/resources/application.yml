@@ -1,10 +1,13 @@
 server:
-  port: 8080
+  port: 8085
   servlet:
     context-path: /javaapp
 spring:
   messages:
+    basename: messages
     encoding: UTF-8
+    fallback-to-system-locale: true
+    use-code-as-default-message: false
   datasource:
     url: jdbc:postgresql://localhost:5432/java-learn
     username: ${DB_USERNAME}

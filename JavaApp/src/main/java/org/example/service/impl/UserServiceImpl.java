@@ -3,8 +3,11 @@ package org.example.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.config.AppConfig;
-import org.example.converter.AppUserToTeacherViewConverter;
+import org.example.converter.AppUserToTeacherDtoConverter;
 import org.example.converter.UserConverter;
+import org.example.dto.TeacherDto;
+import org.example.dto.user.UserDto;
+import org.example.dto.user.UserShortDto;
 import org.example.enums.EmailTemplate;
 import org.example.enums.UserRole;
 import org.example.exception.ActiveUserException;
@@ -22,9 +25,6 @@ import org.example.service.TestResultService;
 import org.example.service.UserService;
 import org.example.validator.NewPasswordValidator;
 import org.example.validator.NewUserValidator;
-import org.example.view.TeacherView;
-import org.example.view.user.UserShortView;
-import org.example.view.user.UserView;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,39 +57,41 @@ public class UserServiceImpl implements UserService {
 
     private final NewUserValidator userValidator;
 
-    private final AppUserToTeacherViewConverter teacherViewConverter;
+    private final AppUserToTeacherDtoConverter teacherDtoConverter;
 
     private final TestResultService testResultService;
 
+    private final PasswordGenerator passwordGenerator;
+
     @Transactional
     @Override
-    public void createNewUser(UserShortView userShortView) {
+    public void createNewUser(UserShortDto userShortDto) {
         log.info("Создание нового пользователя");
-        if (!userShortView.getPassword().equals(userShortView.getConfirmPassword())) {
+        if (!userShortDto.getPassword().equals(userShortDto.getConfirmPassword())) {
             throw new WrongPasswordException("Некорректное подтверждение пароля");
         }
-        Map<String, String> validationResult = userValidator.validate(userShortView.getUsername(), userShortView.getEmail());
+        Map<String, String> validationResult = userValidator.validate(userShortDto.getUsername(), userShortDto.getEmail());
 
         if (!validationResult.isEmpty()) {
             log.error("Возникла ошибка при создании пользователя: {}", String.join(" ,", validationResult.values()));
             throw new ValidationException("При создании нового пользователя возникла ошибка", validationResult);
         }
-        String passwordForDB = encoder.encode(userShortView.getPassword());
+        String passwordForDB = encoder.encode(userShortDto.getPassword());
         AppUser user = AppUser.builder()
             .role(UserRole.USER)
-            .username(userShortView.getUsername())
+            .username(userShortDto.getUsername())
             .password(passwordForDB)
-            .email(userShortView.getEmail())
+            .email(userShortDto.getEmail())
             .isActive(true)
             .build();
         userRepository.save(user);
         Map<String, Object> data = new HashMap<>();
-        data.put("username", userShortView.getUsername());
-        data.put("email", userShortView.getEmail());
+        data.put("username", userShortDto.getUsername());
+        data.put("email", userShortDto.getEmail());
         data.put("supportEmail", config.getAdminEmail());
         data.put("baseUrl", config.getBaseUrl());
         contactService.sendMsgToUser(user.getEmail(), data, EmailTemplate.REGISTRATION_SUCCESS);
-        log.info("Пользователь с username {} успешно создан", userShortView.getUsername());
+        log.info("Пользователь с username {} успешно создан", userShortDto.getUsername());
     }
 
     @Transactional
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
             log.error("Возникла ошибка при создании учителя: {}", String.join(" ,", validationResult.values()));
             throw new ValidationException("При создании нового преподавателя возникла ошибка", validationResult);
         }
-        String password = PasswordGenerator.generate();
+        String password = passwordGenerator.generate();
         AppUser user = AppUser.builder()
             .role(UserRole.TEACHER)
             .username(username)
@@ -140,7 +142,7 @@ public class UserServiceImpl implements UserService {
         if (!user.isActive()) {
             throw new InactiveUserException("Учетная запись деактивирована");
         }
-        String newPassword = PasswordGenerator.generate();
+        String newPassword = passwordGenerator.generate();
         user.setPassword(encoder.encode(newPassword));
         userRepository.save(user);
         Map<String, Object> data = new HashMap<>();
@@ -179,11 +181,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserView findById(Long id) {
+    public UserDto findById(Long id) {
         log.info("Поиск пользователя по id {}", id);
         AppUser user = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Пользователь с id %d не найден".formatted(id)));
-        return converter.toView(user);
+        return converter.toDto(user);
     }
 
     @Transactional
@@ -226,11 +228,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void updateUserProfile(Long id, UserView userView, MultipartFile photoFile) {
+    public void updateUserProfile(Long id, UserDto userDto, MultipartFile photoFile) {
         log.info("Реактирование пользователя id {}", id);
         AppUser appUser = userRepository.findById(id).orElseThrow(() ->
             new EntityNotFoundException("Пользователь с id=%d не найден".formatted(id)));
-        appUser = converter.toEntity(appUser, userView);
+        appUser = converter.toEntity(appUser, userDto);
         if (photoFile != null && !photoFile.isEmpty()) {
             String photoName = appUser.getUsername() + ".jpg";
             try {
@@ -288,10 +290,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<UserView> findByRole(UserRole userRole) {
+    public List<UserDto> findByRole(UserRole userRole) {
         log.info("Поиск пользователей с ролью {}", userRole.getRoleName());
-        List<UserView> users = userRepository.findByRole(userRole).stream()
-            .map(converter::toView)
+        List<UserDto> users = userRepository.findByRole(userRole).stream()
+            .map(converter::toDto)
             .toList();
         log.info("Найдено {} пользователей с ролью {}", users.size(), userRole.getRoleName());
         return users;
@@ -299,10 +301,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<TeacherView> findTeachers() {
+    public List<TeacherDto> findTeachers() {
         log.info("Поиск учителей");
-        List<TeacherView> teachers = userRepository.findByRole(UserRole.TEACHER).stream()
-            .map(teacherViewConverter::convert)
+        List<TeacherDto> teachers = userRepository.findByRole(UserRole.TEACHER).stream()
+            .map(teacherDtoConverter::convert)
             .toList();
         log.info("Найдено {} преподавателей", teachers.size());
         return teachers;

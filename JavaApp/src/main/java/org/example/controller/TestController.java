@@ -6,8 +6,8 @@ import org.example.model.AppUser;
 import org.example.service.TestResultService;
 import org.example.service.TestService;
 import org.example.service.UserService;
-import org.example.view.test.TestResultView;
-import org.example.view.test.TestSubmitView;
+import org.example.dto.test.TestResultDto;
+import org.example.dto.test.TestSubmitDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,11 +50,11 @@ public class TestController {
     }
 
     @PostMapping("/tests/submit")
-    public String submitTest(@RequestBody TestSubmitView testSubmitView,
+    public String submitTest(@RequestBody TestSubmitDto testSubmitDto,
         Authentication authentication,
         Model model) {
         AppUser user = (AppUser) authentication.getPrincipal();
-        TestResultView result = testService.processTestResult(testSubmitView, user.getId());
+        TestResultDto result = testService.processTestResult(testSubmitDto, user.getId());
         model.addAttribute("result", result);
         return "tests/resultPage";
     }

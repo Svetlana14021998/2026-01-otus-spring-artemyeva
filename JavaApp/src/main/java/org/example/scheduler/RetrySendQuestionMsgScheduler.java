@@ -34,7 +34,7 @@ public class RetrySendQuestionMsgScheduler {
         log.info("find {} questions for send", questions.size());
         for (UserQuestion q : questions) {
             try {
-                contactService.sendQuestionToAdmin(converter.toView(q), EmailTemplate.QUESTION);
+                contactService.sendQuestionToAdmin(converter.toDto(q), EmailTemplate.QUESTION);
                 log.info("Success send email with id: {}", q.getId());
             } catch (SendMessagingException e) {
                 log.error("Can't send email with id: {}", q.getId());

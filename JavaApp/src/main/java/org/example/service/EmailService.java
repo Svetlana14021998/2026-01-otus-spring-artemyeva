@@ -1,8 +1,8 @@
 package org.example.service;
 
-import org.example.dto.EmailRequest;
+import org.example.dto.EmailRequestDto;
 
 public interface EmailService {
 
-    void sendEmail(EmailRequest emailRequest);
+    void sendEmail(EmailRequestDto emailRequestDto);
 }

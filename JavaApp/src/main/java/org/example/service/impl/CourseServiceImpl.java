@@ -2,11 +2,11 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.converter.Course2CourseShortViewConverter;
-import org.example.converter.Course2CourseViewConverter;
-import org.example.converter.Course2CourseViewMaterialsConverter;
-import org.example.converter.CourseCreateView2CourseConverter;
-import org.example.converter.CourseUpdateViewConverter;
+import org.example.converter.Course2CourseShortDtoConverter;
+import org.example.converter.Course2CourseDtoConverter;
+import org.example.converter.Course2CourseWithMaterialsDtoConverter;
+import org.example.converter.CourseCreateDto2CourseConverter;
+import org.example.converter.CourseUpdateDtoConverter;
 import org.example.enums.CourseType;
 import org.example.exception.EntityNotFoundException;
 import org.example.exception.PermissionException;
@@ -15,11 +15,11 @@ import org.example.model.Course;
 import org.example.repository.CourseRepository;
 import org.example.repository.specification.CourseSpecification;
 import org.example.service.CourseService;
-import org.example.view.course.CourseCreateView;
-import org.example.view.course.CourseShortView;
-import org.example.view.course.CourseUpdateView;
-import org.example.view.course.CourseView;
-import org.example.view.course.CourseWithMaterialsView;
+import org.example.dto.course.CourseCreateDto;
+import org.example.dto.course.CourseShortDto;
+import org.example.dto.course.CourseUpdateDto;
+import org.example.dto.course.CourseDto;
+import org.example.dto.course.CourseWithMaterialsDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,31 +37,31 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository repository;
 
-    private final Course2CourseViewConverter course2CourseViewConverter;
+    private final Course2CourseDtoConverter course2CourseDtoConverter;
 
-    private final Course2CourseViewMaterialsConverter course2CourseViewMaterialsConverter;
+    private final Course2CourseWithMaterialsDtoConverter course2CourseWithMaterialsDtoConverter;
 
-    private final CourseCreateView2CourseConverter courseCreateView2CourseConverter;
+    private final CourseCreateDto2CourseConverter courseCreateDto2CourseConverter;
 
-    private final CourseUpdateViewConverter courseUpdateViewConverter;
+    private final CourseUpdateDtoConverter courseUpdateDtoConverter;
 
-    private final Course2CourseShortViewConverter course2CourseShortViewConverter;
+    private final Course2CourseShortDtoConverter course2CourseShortDtoConverter;
 
     @Transactional(readOnly = true)
     @Override
-    public Page<CourseView> findAll(Long authorId, String description, CourseType courseType, int pageNumber, int pageSize) {
+    public Page<CourseDto> findAll(Long authorId, String description, CourseType courseType, int pageNumber, int pageSize) {
         log.info("Поиск курсов");
         Specification<Course> spec = buildSpecification(authorId, description, courseType);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return repository.findAll(spec, pageable).map(course2CourseViewConverter::convert);
+        return repository.findAll(spec, pageable).map(course2CourseDtoConverter::convert);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public CourseView findById(Long id) {
+    public CourseDto findById(Long id) {
         log.info("Поиск курса по id {}", id);
-        return course2CourseViewConverter.convert(repository.findById(id)
+        return course2CourseDtoConverter.convert(repository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Курс не найден")));
     }
 
@@ -84,18 +84,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional(readOnly = true)
     @Override
-    public CourseShortView findByIdForTest(Long id) {
+    public CourseShortDto findByIdForTest(Long id) {
         log.info("Поиск краткой информации о курсе по id {}", id);
-        return course2CourseShortViewConverter.convert(repository.findById(id)
+        return course2CourseShortDtoConverter.convert(repository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Курс не найден")));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<CourseShortView> findCourseWithoutTestForTeacher(Long userId) {
+    public List<CourseShortDto> findCourseWithoutTestForTeacher(Long userId) {
         log.info("Поиск курсов, по которым нет тестов, для преподавателя id {}", userId);
-        List<CourseShortView> courses = repository.findByTestIdIsNullAndAuthorIdIs(userId).stream()
-            .map(course2CourseShortViewConverter::convert)
+        List<CourseShortDto> courses = repository.findByTestIdIsNullAndAuthorIdIs(userId).stream()
+            .map(course2CourseShortDtoConverter::convert)
             .toList();
         log.info("Найдено {} курсов без тестов для преподавателя id {}", courses.size(), userId);
         return courses;
@@ -103,17 +103,17 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional(readOnly = true)
     @Override
-    public CourseUpdateView findByIdToEdit(Long id) {
+    public CourseUpdateDto findByIdToEdit(Long id) {
         log.info("Поиск курса id {} для модификации", id);
-        return courseUpdateViewConverter.toView(repository.findById(id)
+        return courseUpdateDtoConverter.toDto(repository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Курс не найден")));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public CourseWithMaterialsView findByIdWithMaterials(Long id) {
+    public CourseWithMaterialsDto findByIdWithMaterials(Long id) {
         log.info("Поиск курса id {} и материалов по нему", id);
-        return course2CourseViewMaterialsConverter.convert(repository.findById(id)
+        return course2CourseWithMaterialsDtoConverter.convert(repository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Курс не найден")));
     }
 
@@ -142,9 +142,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional
     @Override
-    public void save(CourseCreateView courseCreateView, AppUser user) {
+    public void save(CourseCreateDto courseCreateDto, AppUser user) {
         log.info("Создание курса");
-        Course course = courseCreateView2CourseConverter.convert(courseCreateView, user);
+        Course course = courseCreateDto2CourseConverter.convert(courseCreateDto, user);
         course = repository.save(course);
         log.info("Курс id {} создан", course.getId());
     }
@@ -159,8 +159,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Transactional
     @Override
-    public void update(CourseUpdateView courseUpdateView, Long userId) {
-        Long courseId = courseUpdateView.getId();
+    public void update(CourseUpdateDto courseUpdateDto, Long userId) {
+        Long courseId = courseUpdateDto.getId();
         log.info("Изменение курса id {}", courseId);
         Course course = repository.findById(courseId)
             .orElseThrow(() -> new EntityNotFoundException("Курс id=%d не найден".formatted(courseId)));
@@ -168,7 +168,7 @@ public class CourseServiceImpl implements CourseService {
             throw new PermissionException("Курс может быть изменен только преподавателем, который его создал",
                 "Вы не можете изменить курс, созданный другим преподавателем");
         }
-        course = courseUpdateViewConverter.toEntity(course, courseUpdateView);
+        course = courseUpdateDtoConverter.toEntity(course, courseUpdateDto);
         repository.save(course);
         log.info("Курс id {} изменен", course);
     }

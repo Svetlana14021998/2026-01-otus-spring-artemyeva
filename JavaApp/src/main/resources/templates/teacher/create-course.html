@@ -61,7 +61,7 @@
                     <option th:each="type : ${courseTypes}"
                             th:value="${type}"
                             th:text="${type.description}"
-                            th:selected="${courseCreateView != null && courseCreateView.courseType == type}">
+                            th:selected="${courseCreateDto != null && courseCreateDto.courseType == type}">
                     </option>
                 </select>
                 <div th:if="${errors != null && errors.containsKey('courseType')}" class="field-error">
@@ -74,7 +74,7 @@
                 <label for="description">Описание курса</label>
                 <textarea id="description" name="description" class="form-control" rows="4"
                           th:classappend="${errors != null && errors.containsKey('description')} ? 'input-error' : ''"
-                          th:text="${courseCreateView != null ? courseCreateView.description : ''}"
+                          th:text="${courseCreateDto != null ? courseCreateDto.description : ''}"
                           placeholder="Введите описание курса..."></textarea>
                 <div th:if="${errors != null && errors.containsKey('description')}" class="field-error">
                     <span th:text="${errors['description']}"></span>
@@ -88,8 +88,8 @@
                     <span th:text="${errors['theoryMaterials']}"></span>
                 </div>
                 <div id="materialsContainer">
-                    <div th:if="${courseCreateView != null and courseCreateView.theoryMaterials != null}">
-                        <div th:each="content, iter : ${courseCreateView.theoryMaterials}"
+                    <div th:if="${courseCreateDto != null and courseCreateDto.theoryMaterials != null}">
+                        <div th:each="content, iter : ${courseCreateDto.theoryMaterials}"
                              th:id="'material-' + ${iter.index + 1}"
                              class="material-block">
                             <div class="material-header">

@@ -1,14 +1,16 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.dto.TeacherDto;
+import org.example.dto.course.CourseDto;
+import org.example.dto.user.UserDto;
 import org.example.enums.CourseType;
 import org.example.enums.UserRole;
 import org.example.exception.ValidationException;
 import org.example.service.StatisticService;
 import org.example.service.UserService;
-import org.example.view.TeacherView;
-import org.example.view.course.CourseView;
-import org.example.view.user.UserView;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +29,11 @@ public class AdminController {
 
     private final StatisticService statisticService;
 
+    private final MessageSource messageSource;
+
     @GetMapping("/admin/employees")
     public String getEmployeesPage(Model model) {
-        List<UserView> teachers = userService.findByRole(UserRole.TEACHER);
+        List<UserDto> teachers = userService.findByRole(UserRole.TEACHER);
         model.addAttribute("teachers", teachers);
         return "admin/employees";
     }
@@ -41,7 +45,8 @@ public class AdminController {
         RedirectAttributes redirectAttributes) {
         try {
             userService.createManager(username, email);
-            redirectAttributes.addFlashAttribute("success", "Новый преподаватель успешно создан");
+            redirectAttributes.addFlashAttribute("success",
+                messageSource.getMessage("teacher.created", null, LocaleContextHolder.getLocale()));
             return "redirect:/admin/employees";
         } catch (ValidationException e) {
             Map<String, String> validationResults = e.getValidationResults();
@@ -66,7 +71,8 @@ public class AdminController {
     public String deleteEmployee(@RequestParam Long id,
         RedirectAttributes redirectAttributes) {
         userService.deleteTeacher(id);
-        redirectAttributes.addFlashAttribute("success", "Преподаватель id=%d удален".formatted(id));
+        redirectAttributes.addFlashAttribute("success", messageSource.getMessage(
+            "teacher.delete", new Object[]{id}, LocaleContextHolder.getLocale()));
         return "redirect:/admin/employees";
     }
 
@@ -74,10 +80,10 @@ public class AdminController {
     public String getStatisticPage(Model model) {
         Double passPercentage = statisticService.getAveragePassPercentage();
         Map<String, Double> averagePercentageByTest = statisticService.getAveragePercentageByTest();
-        List<CourseView> coursesWithoutTests = statisticService.findByTestIdIsNull();
+        List<CourseDto> coursesWithoutTests = statisticService.findByTestIdIsNull();
         Map<CourseType, Double> averagePercentageByCourseType = statisticService.getAveragePercentageByCourseType();
-        Map<TeacherView, Long> teachersCourseCount = statisticService.getTeachersCourseCount();
-        Map<TeacherView, Double> averagePercentageByTeacher = statisticService.getAveragePercentageByTeacher();
+        Map<TeacherDto, Long> teachersCourseCount = statisticService.getTeachersCourseCount();
+        Map<TeacherDto, Double> averagePercentageByTeacher = statisticService.getAveragePercentageByTeacher();
         List<CourseType> courseTypeWithoutCourses = statisticService.courseTypeWithoutCourses();
         model.addAttribute("averagePassPercentage", passPercentage);
         model.addAttribute("coursesWithoutTests", coursesWithoutTests);

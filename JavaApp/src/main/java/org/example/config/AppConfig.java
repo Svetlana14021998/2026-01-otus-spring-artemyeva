@@ -1,39 +1,41 @@
 package org.example.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "app")
 @Getter
+@Setter
 public class AppConfig {
 
-    @Value("${app.phone}")
     private String phone;
 
-    @Value("${app.email}")
     private String email;
 
-    @Value("${app.telegram}")
     private String telegram;
 
-    @Value("${app.admin-email}")
     private String adminEmail;
 
     @Value("${spring.mail.username}")
     private String autoSendEmail;
 
-    @Value("${app.mail-printform-path}")
     private String mailPrintFormPath;
 
-    @Value("http://localhost:${server.port}${server.servlet.context-path}")
+    private int port;
+
     private String baseUrl;
 
-    @Value("${app.users-photo-url}")
-    private String baseUsersPhotoUrl;
+    private String usersPhotoUrl;
 
-    @Value("${server.servlet.context-path}")
     private String contextPath;
+
+    @PostConstruct
+    public void init() {
+        this.baseUrl = "http://localhost:" + port + contextPath;
+    }
 }

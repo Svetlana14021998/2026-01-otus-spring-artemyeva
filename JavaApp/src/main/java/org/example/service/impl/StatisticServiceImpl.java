@@ -2,15 +2,15 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.converter.Course2CourseViewConverter;
+import org.example.converter.Course2CourseDtoConverter;
 import org.example.enums.CourseType;
 import org.example.repository.CourseRepository;
 import org.example.repository.TestRepository;
 import org.example.repository.TestResultRepository;
 import org.example.repository.UserRepository;
 import org.example.service.StatisticService;
-import org.example.view.TeacherView;
-import org.example.view.course.CourseView;
+import org.example.dto.TeacherDto;
+import org.example.dto.course.CourseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ public class StatisticServiceImpl implements StatisticService {
 
     private final CourseRepository courseRepository;
 
-    private final Course2CourseViewConverter course2CourseViewConverter;
+    private final Course2CourseDtoConverter course2CourseDtoConverter;
 
     private final TestRepository testRepository;
 
@@ -59,10 +59,10 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<CourseView> findByTestIdIsNull() {
+    public List<CourseDto> findByTestIdIsNull() {
         log.info("Поиск курсов, по которым нет тестов");
-        List<CourseView> courses = courseRepository.findByTestIdIsNull()
-            .stream().map(course2CourseViewConverter::convert)
+        List<CourseDto> courses = courseRepository.findByTestIdIsNull()
+            .stream().map(course2CourseDtoConverter::convert)
             .toList();
         log.info("Найдено {} курсов без тестов", courses.size());
         return courses;
@@ -96,32 +96,32 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Transactional(readOnly = true)
     @Override
-    public Map<TeacherView, Long> getTeachersCourseCount() {
+    public Map<TeacherDto, Long> getTeachersCourseCount() {
         log.info("Получение количества курсов для каждого учителя");
-        Map<TeacherView, Long> result = new LinkedHashMap<>();
+        Map<TeacherDto, Long> result = new LinkedHashMap<>();
         userRepository.getTeachersCourseCount()
             .forEach(row -> {
-                TeacherView view = TeacherView.builder()
+                TeacherDto dto = TeacherDto.builder()
                     .id((Long) row[0])
                     .fullName((String) row[1])
                     .build();
-                result.put(view, (Long) row[2]);
+                result.put(dto, (Long) row[2]);
             });
         return result;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Map<TeacherView, Double> getAveragePercentageByTeacher() {
+    public Map<TeacherDto, Double> getAveragePercentageByTeacher() {
         log.info("Получение среднего результата прохождения тестов каждого учителя");
-        Map<TeacherView, Double> result = new LinkedHashMap<>();
+        Map<TeacherDto, Double> result = new LinkedHashMap<>();
         courseRepository.getAveragePercentageByTeacher()
             .forEach(row -> {
-                TeacherView view = TeacherView.builder()
+                TeacherDto dto = TeacherDto.builder()
                     .id((Long) row[0])
                     .fullName((String) row[1])
                     .build();
-                result.put(view, (Double) row[2]);
+                result.put(dto, (Double) row[2]);
             });
         return result;
     }

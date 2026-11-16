@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.config.AppConfig;
 import org.example.converter.UserQuestionConverter;
-import org.example.dto.EmailRequest;
+import org.example.dto.EmailRequestDto;
 import org.example.enums.EmailTemplate;
 import org.example.exception.SendMessagingException;
 import org.example.model.UserQuestion;
 import org.example.service.ContactService;
 import org.example.service.EmailService;
 import org.example.service.UserQuestionService;
-import org.example.view.UserQuestionView;
+import org.example.dto.UserQuestionDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,16 +33,16 @@ public class ContactServiceImpl implements ContactService {
 
     @Transactional
     @Override
-    public void sendQuestionToAdmin(UserQuestionView userQuestionView, EmailTemplate template) {
+    public void sendQuestionToAdmin(UserQuestionDto userQuestionDto, EmailTemplate template) {
         log.info("Отправка сообщения {} администратору", template.getDescription());
-        UserQuestion question = converter.toEntity(userQuestionView);
+        UserQuestion question = converter.toEntity(userQuestionDto);
         try {
             Map<String, Object> data = new HashMap<>();
-            data.put("name", userQuestionView.getName());
-            data.put("email", userQuestionView.getEmail());
-            data.put("message", userQuestionView.getMessage());
+            data.put("name", userQuestionDto.getName());
+            data.put("email", userQuestionDto.getEmail());
+            data.put("message", userQuestionDto.getMessage());
 
-            EmailRequest adminEmail = EmailRequest.builder()
+            EmailRequestDto adminEmail = EmailRequestDto.builder()
                 .to(config.getAdminEmail())
                 .subject(template.getDescription())
                 .template(template)
@@ -68,7 +68,7 @@ public class ContactServiceImpl implements ContactService {
         log.info("Отправка сообщения {} пользователю {}", template.getDescription(), userEmail);
 
         try {
-            EmailRequest adminEmail = EmailRequest.builder()
+            EmailRequestDto adminEmail = EmailRequestDto.builder()
                 .to(userEmail)
                 .subject(template.getDescription())
                 .template(template)

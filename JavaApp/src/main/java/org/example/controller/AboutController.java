@@ -2,6 +2,7 @@ package org.example.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.dto.UserQuestionDto;
 import org.example.enums.EmailTemplate;
 import org.example.enums.UserRole;
 import org.example.exception.SendMessagingException;
@@ -9,7 +10,8 @@ import org.example.service.ContactService;
 import org.example.service.CourseService;
 import org.example.service.TestService;
 import org.example.service.UserService;
-import org.example.view.UserQuestionView;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,17 +36,19 @@ public class AboutController {
 
     private final TestService testService;
 
+    private final MessageSource messageSource;
+
     @GetMapping("/about")
     public String getAboutPage(Model model) {
         addCommonAttributes(model);
         if (!model.containsAttribute("question")) {
-            model.addAttribute("question", new UserQuestionView());
+            model.addAttribute("question", new UserQuestionDto());
         }
         return "about";
     }
 
     @PostMapping("about/send-question")
-    public String sendQuestion(@Valid @ModelAttribute UserQuestionView question,
+    public String sendQuestion(@Valid @ModelAttribute UserQuestionDto question,
         BindingResult bindingResult,
         RedirectAttributes redirectAttributes,
         Model model) {
@@ -63,10 +67,11 @@ public class AboutController {
 
         try {
             contactService.sendQuestionToAdmin(question, EmailTemplate.QUESTION);
-            redirectAttributes.addFlashAttribute("success", "Сообщение успешно отправлено!");
+            redirectAttributes.addFlashAttribute("success",
+                messageSource.getMessage("msg.send.success", null, LocaleContextHolder.getLocale()));
         } catch (SendMessagingException e) {
             redirectAttributes.addFlashAttribute("error",
-                "Ошибка при отправке сообщения. Если в течении суток с вами не свяжутся, пожатуйста, позвоните в службу поддержки");
+                messageSource.getMessage("msg.send.error", null, LocaleContextHolder.getLocale()));
         }
         return "redirect:/about";
     }

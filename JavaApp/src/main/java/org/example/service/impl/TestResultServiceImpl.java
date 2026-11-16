@@ -2,13 +2,13 @@ package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.converter.TestResult2TestResultViewConverter;
+import org.example.converter.TestResult2TestResultDtoConverter;
 import org.example.enums.CourseType;
 import org.example.model.TestResult;
 import org.example.repository.TestResultRepository;
 import org.example.repository.specification.TestResultSpecification;
 import org.example.service.TestResultService;
-import org.example.view.test.TestResultView;
+import org.example.dto.test.TestResultDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ public class TestResultServiceImpl implements TestResultService {
 
     private final TestResultRepository testResultRepository;
 
-    private final TestResult2TestResultViewConverter testResult2TestResultViewConverter;
+    private final TestResult2TestResultDtoConverter testResult2TestResultDtoConverter;
 
     @Transactional
     @Override
@@ -35,20 +35,20 @@ public class TestResultServiceImpl implements TestResultService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<TestResultView> findByUserId(Long userId, Boolean isOnlyLatestResults, Boolean isPassed, Long testId, CourseType courseType, int pageNumber,
+    public Page<TestResultDto> findByUserId(Long userId, Boolean isOnlyLatestResults, Boolean isPassed, Long testId, CourseType courseType, int pageNumber,
         int pageSize) {
         log.info("Поиск результатов тестирования для пользователя id {}", userId);
         Specification<TestResult> spec = buildSpecification(userId, isOnlyLatestResults, isPassed, testId, courseType);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return testResultRepository.findAll(spec, pageable)
-            .map(testResult2TestResultViewConverter::convert);
+            .map(testResult2TestResultDtoConverter::convert);
     }
 
     @Transactional
     @Override
-    public TestResultView save(TestResult testResult) {
+    public TestResultDto save(TestResult testResult) {
         log.info("Сохранение результатов теста {} для пользователя id {}", testResult.getTest().getTitle(), testResult.getUserId());
-        return testResult2TestResultViewConverter.convert(testResultRepository.save(testResult));
+        return testResult2TestResultDtoConverter.convert(testResultRepository.save(testResult));
     }
 
     private Specification<TestResult> buildSpecification(Long userId, Boolean isOnlyLatestResults, Boolean isPassed, Long testId, CourseType courseType) {

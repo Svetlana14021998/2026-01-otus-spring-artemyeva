@@ -1,8 +1,8 @@
 package org.example.service;
 
 import org.example.enums.CourseType;
-import org.example.view.TeacherView;
-import org.example.view.course.CourseView;
+import org.example.dto.TeacherDto;
+import org.example.dto.course.CourseDto;
 
 import java.util.List;
 import java.util.Map;
@@ -13,13 +13,13 @@ public interface StatisticService {
 
     Map<CourseType, Double> getAveragePercentageByCourseType();
 
-    List<CourseView> findByTestIdIsNull();
+    List<CourseDto> findByTestIdIsNull();
 
     Map<String, Double> getAveragePercentageByTest();
 
     List<CourseType> courseTypeWithoutCourses();
 
-    Map<TeacherView, Long> getTeachersCourseCount();
+    Map<TeacherDto, Long> getTeachersCourseCount();
 
-    Map<TeacherView, Double> getAveragePercentageByTeacher();
+    Map<TeacherDto, Double> getAveragePercentageByTeacher();
 }
